@@ -2,62 +2,64 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Google Ad Test</title>
+    <title>AssertiveYield Test Ad</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>
+      // Forward console.log to Swift/Xcode
+      (function() {
+        var oldLog = console.log;
+        console.log = function() {
+          oldLog.apply(console, arguments);
+          if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.log) {
+            window.webkit.messageHandlers.log.postMessage(Array.from(arguments).join(' '));
+          }
+        };
+      })();
+      // Enable AY debug via localStorage
+      localStorage.setItem("assertiveYield", "debug");
+      // Read tcfString from query param and expose via __tcfapi
+      function getQueryParam(name, defaultValue) {
+        const url = new URL(window.location.href);
+        return url.searchParams.get(name) || defaultValue;
+      }
+      var tcfString = getQueryParam('tcfString', '');
+      window.__tcfapi = function(command, version, callback) {
+        if (command === 'getTCData') {
+          callback({ tcString: tcfString }, true);
+        }
+      };
+      console.log('[AY DEBUG] TCF string set to:', tcfString);
+    </script>
+    <script src="https://sM2jrWhrfkRNS6Bjc.ay.delivery/manager/sM2jrWhrfkRNS6Bjc" type="text/javascript" referrerpolicy="no-referrer-when-downgrade"></script>
     <style>
       html, body {
         margin: 0;
         padding: 0;
         width: 100vw;
-        height: 100vh;
-        overflow: hidden;
+        min-height: 100vh;
         background: #fff;
       }
-      #ad-container {
+      .ad-container {
+        width: 100vw;
+        min-height: 50px;
         display: flex;
         align-items: center;
         justify-content: center;
-        width: 100vw;
-        height: 100vh;
       }
     </style>
-    <script async src="https://securepubads.g.doubleclick.net/tag/js/gpt.js"></script>
-    <script>
-      function logToSwift(msg) {
-        console.log(msg);
-        if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.log) {
-          window.webkit.messageHandlers.log.postMessage(msg);
-        }
-      }
-      function getQueryParam(name, defaultValue) {
-        const url = new URL(window.location.href);
-        return url.searchParams.get(name) || defaultValue;
-      }
-      window.googletag = window.googletag || {cmd: []};
-      // Create the ad div dynamically
-      var slotId = getQueryParam('slotId', 'div-gpt-ad-dynamic');
-      var adDiv = document.createElement('div');
-      adDiv.id = slotId;
-      document.addEventListener('DOMContentLoaded', function() {
-        document.getElementById('ad-container').appendChild(adDiv);
-        logToSwift('Appended ad div with id: ' + slotId);
-      });
-      googletag.cmd.push(function() {
-        var adUnitPath = getQueryParam('adUnitPath', '/6355419/Travel/Europe/France/Paris');
-        var width = parseInt(getQueryParam('width', '300'));
-        var height = parseInt(getQueryParam('height', '250'));
-        var adDiv = document.getElementById(slotId);
-        adDiv.style.width = width + 'px';
-        adDiv.style.height = height + 'px';
-        logToSwift('Defining slot: ' + adUnitPath + ' size: ' + width + 'x' + height + ' id: ' + slotId);
-        googletag.defineSlot(adUnitPath, [width, height], slotId).addService(googletag.pubads());
-        googletag.enableServices();
-        googletag.display(slotId);
-        logToSwift('Called googletag.display for slotId: ' + slotId);
-      });
-    </script>
 </head>
 <body>
-    <div id="ad-container"></div>
+    <div class="ad-container" style="flex-direction: column; align-items: center; justify-content: flex-start; min-height: 120px;">
+      <div data-ay-manager-id="div-gpt-ad-mobile_1" id="div-gpt-ad-mobile_1" style="width:300px; height:250px; background:#f8f8f8; border:1px solid #ccc; display:flex; align-items:center; justify-content:center;"></div>
+      <script type="text/javascript">
+        window.ayManagerEnv = window.ayManagerEnv || { cmd : []};
+        window.ayManagerEnv.cmd.push(function() {
+            ayManagerEnv.display("div-gpt-ad-mobile_1");
+        });
+      </script>
+      <div style="text-align:center; margin-top:16px;">
+        <button onclick="if(window.googletag && googletag.openConsole){googletag.openConsole();}else{alert('googletag.openConsole() is not available yet. Make sure GPT.js is loaded.');}" style="padding:8px 16px; font-size:16px; cursor:pointer;">Open Google Publisher Console</button>
+      </div>
+    </div>
 </body>
 </html>
