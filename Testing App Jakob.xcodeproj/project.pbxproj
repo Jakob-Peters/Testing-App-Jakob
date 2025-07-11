@@ -6,6 +6,11 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		864220B92E2110B500AA0DAC /* GoogleMobileAds in Frameworks */ = {isa = PBXBuildFile; productRef = 864220B82E2110B500AA0DAC /* GoogleMobileAds */; };
+		864D360F2E21211000E176D0 /* Didomi in Frameworks */ = {isa = PBXBuildFile; productRef = 864D360E2E21211000E176D0 /* Didomi */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		864220902E210F7700AA0DAC /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -45,6 +50,26 @@
 			path = "Testing App JakobUITests";
 			sourceTree = "<group>";
 		};
+		864220AD2E210FBF00AA0DAC /* Features */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Features;
+			sourceTree = "<group>";
+		};
+		864220B22E21103900AA0DAC /* Shared */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Shared;
+			sourceTree = "<group>";
+		};
+		864220B42E21104F00AA0DAC /* Models */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Models;
+			sourceTree = "<group>";
+		};
+		864220B62E21105B00AA0DAC /* Resources */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Resources;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -52,6 +77,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				864D360F2E21211000E176D0 /* Didomi in Frameworks */,
+				864220B92E2110B500AA0DAC /* GoogleMobileAds in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -75,6 +102,10 @@
 		864220792E210F7600AA0DAC = {
 			isa = PBXGroup;
 			children = (
+				864220B62E21105B00AA0DAC /* Resources */,
+				864220B42E21104F00AA0DAC /* Models */,
+				864220B22E21103900AA0DAC /* Shared */,
+				864220AD2E210FBF00AA0DAC /* Features */,
 				864220842E210F7600AA0DAC /* Testing App Jakob */,
 				864220922E210F7700AA0DAC /* Testing App JakobTests */,
 				8642209C2E210F7700AA0DAC /* Testing App JakobUITests */,
@@ -109,9 +140,15 @@
 			);
 			fileSystemSynchronizedGroups = (
 				864220842E210F7600AA0DAC /* Testing App Jakob */,
+				864220AD2E210FBF00AA0DAC /* Features */,
+				864220B22E21103900AA0DAC /* Shared */,
+				864220B42E21104F00AA0DAC /* Models */,
+				864220B62E21105B00AA0DAC /* Resources */,
 			);
 			name = "Testing App Jakob";
 			packageProductDependencies = (
+				864220B82E2110B500AA0DAC /* GoogleMobileAds */,
+				864D360E2E21211000E176D0 /* Didomi */,
 			);
 			productName = "Testing App Jakob";
 			productReference = 864220822E210F7600AA0DAC /* Testing App Jakob.app */;
@@ -195,6 +232,10 @@
 			);
 			mainGroup = 864220792E210F7600AA0DAC;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				864220B72E2110B500AA0DAC /* XCRemoteSwiftPackageReference "swift-package-manager-google-mobile-ads" */,
+				864D360D2E21211000E176D0 /* XCRemoteSwiftPackageReference "didomi-ios-sdk-spm" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 864220832E210F7600AA0DAC /* Products */;
 			projectDirPath = "";
@@ -397,6 +438,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Testing-App-Jakob-Info.plist";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -424,6 +466,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Testing-App-Jakob-Info.plist";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -550,6 +593,38 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		864220B72E2110B500AA0DAC /* XCRemoteSwiftPackageReference "swift-package-manager-google-mobile-ads" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/googleads/swift-package-manager-google-mobile-ads.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 12.7.0;
+			};
+		};
+		864D360D2E21211000E176D0 /* XCRemoteSwiftPackageReference "didomi-ios-sdk-spm" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/didomi/didomi-ios-sdk-spm";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.26.2;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		864220B82E2110B500AA0DAC /* GoogleMobileAds */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 864220B72E2110B500AA0DAC /* XCRemoteSwiftPackageReference "swift-package-manager-google-mobile-ads" */;
+			productName = GoogleMobileAds;
+		};
+		864D360E2E21211000E176D0 /* Didomi */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 864D360D2E21211000E176D0 /* XCRemoteSwiftPackageReference "didomi-ios-sdk-spm" */;
+			productName = Didomi;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 8642207A2E210F7600AA0DAC /* Project object */;
 }
