@@ -1,39 +1,56 @@
 import SwiftUI
+import Didomi
 
 struct ContentView: View {
-    @State private var inlineAdURL: URL?
+    func adURL(adUnitPath: String, width: Int, height: Int, slotId: String) -> URL? {
+        if let fileURL = Bundle.main.url(forResource: "google-test-ad", withExtension: "html") {
+            var components = URLComponents(url: fileURL, resolvingAgainstBaseURL: false)
+            components?.queryItems = [
+                URLQueryItem(name: "adUnitPath", value: adUnitPath),
+                URLQueryItem(name: "width", value: String(width)),
+                URLQueryItem(name: "height", value: String(height)),
+                URLQueryItem(name: "slotId", value: slotId)
+            ]
+            return components?.url
+        }
+        return nil
+    }
 
     var body: some View {
-        VStack {
-            Text("Ad Tech Testbed")
-               .font(.largeTitle)
-               .padding()
+        ScrollView {
+            VStack(spacing: 32) {
+                Text("Welcome to the Ad Tech Testbed!")
+                    .font(.title)
+                    .padding(.top, 32)
 
-            Spacer()
+                Text("This is some text before the first ad.")
+                    .font(.body)
 
-            // Display the inline ad WebView
-            if let url = inlineAdURL {
-                AdWebView(url: url)
-                   .frame(height: 300) // Adjust height as needed for your inline ad
-                   .border(Color.gray, width: 1) // Visual border for the ad container
-                   .padding()
-            } else {
-                Text("Loading inline ad...")
-                   .padding()
+                if let url1 = adURL(adUnitPath: "/6355419/Travel/Europe/France/Paris", width: 300, height: 250, slotId: "ad-slot-1") {
+                    AdWebView(url: url1)
+                        .frame(height: 250)
+                        .border(Color.gray, width: 1)
+                        .padding(.horizontal)
+                } else {
+                    Text("Ad 1 failed to load.")
+                }
+
+                Text("This is some text between the ads.")
+                    .font(.body)
+
+                if let url2 = adURL(adUnitPath: "/6355419/Travel/Europe/France/Paris", width: 300, height: 250, slotId: "ad-slot-2") {
+                    AdWebView(url: url2)
+                        .frame(height: 250)
+                        .border(Color.blue, width: 1)
+                        .padding(.horizontal)
+                } else {
+                    Text("Ad 2 failed to load.")
+                }
+
+                Text("This is some text after the second ad.")
+                    .font(.body)
+                    .padding(.bottom, 32)
             }
-
-            Button("Load Inline Ad") {
-                // Example: Get TCF string from Didomi (after Didomi.shared.onReady is called)
-                let tcfString = Didomi.shared.getQueryStringForWebView() // [11]
-                let adSlotID = "/1234/native1" // Your ad slot ID
-
-                var components = URLComponents(string: "https://your-ad-server.com/adpage.html")
-                components?.queryItems =
-                inlineAdURL = components?.url
-            }
-           .padding()
-
-            Spacer()
         }
     }
 }

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Google Ad Test</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+      html, body {
+        margin: 0;
+        padding: 0;
+        width: 100vw;
+        height: 100vh;
+        overflow: hidden;
+        background: #fff;
+      }
+      #ad-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100vw;
+        height: 100vh;
+      }
+    </style>
+    <script async src="https://securepubads.g.doubleclick.net/tag/js/gpt.js"></script>
+    <script>
+      function logToSwift(msg) {
+        console.log(msg);
+        if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.log) {
+          window.webkit.messageHandlers.log.postMessage(msg);
+        }
+      }
+      function getQueryParam(name, defaultValue) {
+        const url = new URL(window.location.href);
+        return url.searchParams.get(name) || defaultValue;
+      }
+      window.googletag = window.googletag || {cmd: []};
+      // Create the ad div dynamically
+      var slotId = getQueryParam('slotId', 'div-gpt-ad-dynamic');
+      var adDiv = document.createElement('div');
+      adDiv.id = slotId;
+      document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('ad-container').appendChild(adDiv);
+        logToSwift('Appended ad div with id: ' + slotId);
+      });
+      googletag.cmd.push(function() {
+        var adUnitPath = getQueryParam('adUnitPath', '/6355419/Travel/Europe/France/Paris');
+        var width = parseInt(getQueryParam('width', '300'));
+        var height = parseInt(getQueryParam('height', '250'));
+        var adDiv = document.getElementById(slotId);
+        adDiv.style.width = width + 'px';
+        adDiv.style.height = height + 'px';
+        logToSwift('Defining slot: ' + adUnitPath + ' size: ' + width + 'x' + height + ' id: ' + slotId);
+        googletag.defineSlot(adUnitPath, [width, height], slotId).addService(googletag.pubads());
+        googletag.enableServices();
+        googletag.display(slotId);
+        logToSwift('Called googletag.display for slotId: ' + slotId);
+      });
+    </script>
+</head>
+<body>
+    <div id="ad-container"></div>
+</body>
+</html>

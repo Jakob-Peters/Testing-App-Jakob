@@ -9,8 +9,11 @@ struct AdWebView: UIViewRepresentable {
         let webViewConfiguration = WKWebViewConfiguration()
         // Configure for optimal ad content display (see next step)
         webViewConfiguration.allowsInlineMediaPlayback = true // Allow inline video playback [15]
-        webViewConfiguration.mediaTypesRequiringUserActionForPlayback = // Allow autoplay for media [15]
+        webViewConfiguration.mediaTypesRequiringUserActionForPlayback = [] // Allow autoplay for all media types
         webViewConfiguration.userContentController = context.coordinator.userContentController // For JS injection/communication [16]
+
+        // Register JS log handler
+        context.coordinator.userContentController.add(context.coordinator, name: "log")
 
         let webView = WKWebView(frame:.zero, configuration: webViewConfiguration)
         webView.navigationDelegate = context.coordinator // Set the coordinator as navigation delegate [13, 17]
@@ -34,8 +37,7 @@ struct AdWebView: UIViewRepresentable {
         init(_ parent: AdWebView) {
             self.parent = parent
             super.init()
-            // Add message handlers if you plan to send messages from JS to Swift
-            // userContentController.add(self, name: "yourMessageHandlerName")
+            // Register log handler in makeUIView
         }
 
         // MARK: - WKNavigationDelegate methods
@@ -46,8 +48,8 @@ struct AdWebView: UIViewRepresentable {
             }
 
             // Example: Open external links in Safari
-            if navigationAction.navigationType ==.linkActivated {
-                if!url.host!.contains("stepnetwork.dk") { // Replace with your app's domain or ad server domain
+            if navigationAction.navigationType == .linkActivated {
+                if let host = url.host, !host.contains("stepnetwork.dk") { // Replace with your app's domain or ad server domain
                     UIApplication.shared.open(url)
                     decisionHandler(.cancel) // Prevent WKWebView from loading it [22]
                     return
@@ -57,16 +59,19 @@ struct AdWebView: UIViewRepresentable {
         }
 
         func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
-            print("AdWebView finished loading: \(webView.url?.absoluteString?? "N/A")")
+            print("AdWebView finished loading: \(webView.url?.absoluteString ?? "N/A")")
             // You can inject JavaScript here after the page loads, e.g., to pass TCF string
             // let tcfString = "..." // Get from Didomi
-            // webView.evaluateJavaScript("window.setTcfString('\(tcfString)');") {... } [24, 25]
+            // webView.evaluateJavaScript("window.setTcfString('\\(tcfString)');") {... } [24, 25]
         }
 
         // MARK: - WKScriptMessageHandler (for receiving messages from JavaScript)
         func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
-            // Handle messages sent from JavaScript using window.webkit.messageHandlers.yourMessageHandlerName.postMessage()
-            print("Received message from JS: \(message.name) - \(message.body)")
+            if message.name == "log" {
+                print("[JS LOG] \(message.body)")
+            } else {
+                print("Received message from JS: \(message.name) - \(message.body)")
+            }
         }
     }
 }

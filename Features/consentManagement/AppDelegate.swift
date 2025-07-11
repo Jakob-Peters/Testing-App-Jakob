@@ -5,13 +5,11 @@ import GoogleMobileAds // Import GMA SDK
 class AppDelegate: NSObject, UIApplicationDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
         // Initialize Didomi SDK as early as possible
-        Didomi.shared.initialize(
-            apiKey: "d0661bea-d696-4069-b308-11057215c4c4", // Replace with your actual Didomi API Key
-            localConfigurationPath: nil,
-            remoteConfigurationURL: nil, // Use remote config from Didomi Console (recommended)
-            providerId: nil,
-            disableDidomiRemoteConfig: false // Set to false to load remote config from Didomi Console
+        let params = DidomiInitializeParameters(
+            apiKey: "d0661bea-d696-4069-b308-11057215c4c4"
+            // Add other parameters if needed, e.g., localConfigurationPath, remoteConfigurationURL, etc.
         )
+        Didomi.shared.initialize(params)
 
         // Register a listener for when the Didomi SDK is ready
         Didomi.shared.onReady {
