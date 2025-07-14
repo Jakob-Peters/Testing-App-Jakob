@@ -4,19 +4,37 @@
     <meta charset="UTF-8">
     <title>AssertiveYield Test Ad</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- TCF and debugging -->
     <script>
-      // Forward console.log to Swift/Xcode
+      // In-page console: display all console.log messages in a visible HTML console
       (function() {
+        // Create the in-page console element
+        var inPageConsole = document.createElement('div');
+        inPageConsole.id = 'inPageConsole';
+        inPageConsole.style.cssText = 'background:#111;color:#0f0;font-family:monospace;font-size:13px;padding:8px 12px;max-height:180px;overflow-y:auto;margin:8px 0 0 0;border-radius:6px;box-shadow:0 2px 8px #0003;';
+        inPageConsole.innerHTML = '<b>In-Page Console</b><hr style="border:0;border-top:1px solid #333;margin:4px 0;">';
+        document.addEventListener('DOMContentLoaded', function() {
+          var container = document.querySelector('.ad-container');
+          if (container) container.parentNode.insertBefore(inPageConsole, container);
+        });
+        // Patch console.log
         var oldLog = console.log;
         console.log = function() {
+          var msg = Array.from(arguments).join(' ');
           oldLog.apply(console, arguments);
+          // Show raw logs in the in-page console
+          var line = document.createElement('div');
+          line.textContent = msg;
+          inPageConsole.appendChild(line);
+          inPageConsole.scrollTop = inPageConsole.scrollHeight;
+          // Forward to Swift/Xcode if available
           if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.log) {
-            window.webkit.messageHandlers.log.postMessage(Array.from(arguments).join(' '));
+            window.webkit.messageHandlers.log.postMessage(msg);
           }
         };
       })();
-      // Enable AY debug via localStorage
-      localStorage.setItem("assertiveYield", "debug");
+
       // Read tcfString from query param and expose via __tcfapi
       function getQueryParam(name, defaultValue) {
         const url = new URL(window.location.href);
@@ -28,10 +46,28 @@
           callback({ tcString: tcfString }, true);
         }
       };
-      console.log('[AY DEBUG] TCF string set to:', tcfString);
+      //console.log('[TCF DEBUG] TCF string set to:', tcfString);
+      
     </script>
-    <script src="https://sM2jrWhrfkRNS6Bjc.ay.delivery/manager/sM2jrWhrfkRNS6Bjc" type="text/javascript" referrerpolicy="no-referrer-when-downgrade"></script>
-    <style>
+    <!-- Yield Manager tag and debug -->
+    <script src="https://AFtbN2xnQGXShTYuo.ay.delivery/manager/AFtbN2xnQGXShTYuo" type="text/javascript" referrerpolicy="no-referrer-when-downgrade">
+      // Enable AY debug via localStorage
+      localStorage.setItem("assertiveYield", "debug");
+    </script>
+
+    <!-- Google Publisher Tags: Targeting for debugging -->
+    <script>  
+      // Set GPT targeting on page level using googletag.setTargeting
+      window.googletag = window.googletag || {};
+      window.googletag.cmd = window.googletag.cmd || [];
+      window.googletag.cmd.push(function() {
+        window.googletag.pubads().setTargeting('dfp_target_kv', 'alwayson-standard');
+        console.log('[GPT DEBUG] Set page-level targeting: dfp_target_kv=alwayson-standard');
+      });
+    </script>
+    
+
+<style>
       html, body {
         margin: 0;
         padding: 0;
@@ -50,11 +86,23 @@
 </head>
 <body>
     <div class="ad-container" style="flex-direction: column; align-items: center; justify-content: flex-start; min-height: 120px;">
-      <div data-ay-manager-id="div-gpt-ad-mobile_1" id="div-gpt-ad-mobile_1" style="width:300px; height:250px; background:#f8f8f8; border:1px solid #ccc; display:flex; align-items:center; justify-content:center;"></div>
       <script type="text/javascript">
+        // Dynamically create AY ad unit div and display script based on adUnitId query param
+        function getQueryParam(name) {
+          const url = new URL(window.location.href);
+          return url.searchParams.get(name);
+        }
+        var adUnitId = getQueryParam('adUnitId');
+        // Create the ad unit div
+        var adDiv = document.createElement('div');
+        adDiv.setAttribute('data-ay-manager-id', adUnitId);
+        adDiv.id = adUnitId;
+        // Append the dynamic ad unit directly to the ad-container
+        document.currentScript.parentNode.insertBefore(adDiv, document.currentScript);
+        // Display the ad unit using AY
         window.ayManagerEnv = window.ayManagerEnv || { cmd : []};
         window.ayManagerEnv.cmd.push(function() {
-            ayManagerEnv.display("div-gpt-ad-mobile_1");
+          ayManagerEnv.display(adUnitId);
         });
       </script>
       <div style="text-align:center; margin-top:16px;">

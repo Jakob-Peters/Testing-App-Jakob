@@ -5,14 +5,11 @@ struct ContentView: View {
     @State private var tcfString: String? = nil
     @State private var didomiReady = false
 
-    func adURL(adUnitPath: String, width: Int, height: Int, slotId: String, tcfString: String?) -> URL? {
+    func adURL(adUnitId: String, tcfString: String?) -> URL? {
         if let fileURL = Bundle.main.url(forResource: "google-test-ad", withExtension: "html") {
             var components = URLComponents(url: fileURL, resolvingAgainstBaseURL: false)
             var items = [
-                URLQueryItem(name: "adUnitPath", value: adUnitPath),
-                URLQueryItem(name: "width", value: String(width)),
-                URLQueryItem(name: "height", value: String(height)),
-                URLQueryItem(name: "slotId", value: slotId)
+                URLQueryItem(name: "adUnitId", value: adUnitId)
             ]
             if let tcfString = tcfString {
                 items.append(URLQueryItem(name: "tcfString", value: tcfString))
@@ -36,7 +33,7 @@ struct ContentView: View {
                 Text("This is some text before the first ad.")
                     .font(.body)
 
-                if didomiReady, let tcf = tcfString, let url1 = adURL(adUnitPath: "/6355419/Travel/Europe/France/Paris", width: 300, height: 250, slotId: "ad-slot-1", tcfString: tcf) {
+                if didomiReady, let tcf = tcfString, let url1 = adURL(adUnitId: "div-gpt-ad-mobile_1", tcfString: tcf) {
                     AdWebView(url: url1)
                         .frame(height: 500)
                         .border(Color.gray, width: 1)
@@ -46,11 +43,13 @@ struct ContentView: View {
                 } else {
                     Text("Ad 1 failed to load.")
                 }
-
+                
+                
                 Text("This is some text between the ads.")
                     .font(.body)
-
-                if didomiReady, let tcf = tcfString, let url2 = adURL(adUnitPath: "/6355419/Travel/Europe/France/Paris", width: 300, height: 250, slotId: "ad-slot-2", tcfString: tcf) {
+                .padding(.bottom, 32)
+                
+                if didomiReady, let tcf = tcfString, let url2 = adURL(adUnitId: "div-gpt-ad-mobile_2", tcfString: tcf) {
                     AdWebView(url: url2)
                         .frame(height: 250)
                         .border(Color.blue, width: 1)
@@ -64,7 +63,9 @@ struct ContentView: View {
                 Text("This is some text after the second ad.")
                     .font(.body)
                     .padding(.bottom, 32)
+                
 
+                
                 // Add Didomi consent change button at the bottom
                 Button(action: {
                     // Show the Didomi Preferences screen (always available after consent)
