@@ -18,6 +18,157 @@
 
   <!-- Yield Manager tag and debug -->
 <script src="https://AFtbN2xnQGXShTYuo.ay.delivery/manager/AFtbN2xnQGXShTYuo" type="text/javascript" referrerpolicy="no-referrer-when-downgrade"></script>
+<!-- Observer for ad size in ContenView (app)-->
+<script>
+      // Size monitoring function
+      function monitorAdSize() {
+        console.log('monitorAdSize() called');
+        const adContainer = document.querySelector('.ad-container');
+        if (!adContainer) {
+          console.error('Ad container not found');
+          return;
+        }
+        
+        console.log('Ad container found:', adContainer);
+        console.log('Ad container dimensions:', adContainer.getBoundingClientRect());
+
+        // Function to send size to native app
+        function sendSizeToNative(width, height) {
+          console.log('Attempting to send size to native:', width, height);
+          if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.sizeHandler) {
+            window.webkit.messageHandlers.sizeHandler.postMessage({
+              width: width,
+              height: height
+            });
+            console.log('Size sent to native successfully');
+          } else {
+            console.error('Native message handler not available');
+          }
+        }
+
+        // Function to observe actual ad content
+        function observeAdContent() {
+          console.log('Looking for ad content to observe...');
+          
+          // Wait a bit for the ad to fully load
+          setTimeout(() => {
+            const adElements = adContainer.querySelectorAll('iframe, div[id*="google_ads"], div[id*="gpt"], div[data-google-ad-client]');
+            console.log('Found', adElements.length, 'potential ad elements');
+            
+            if (adElements.length > 0) {
+              adElements.forEach((element, index) => {
+                console.log(`Ad element ${index}:`, element, 'Size:', element.offsetWidth, 'x', element.offsetHeight);
+                
+                if (element.offsetWidth > 0 && element.offsetHeight > 0) {
+                  console.log('Sending ad content size:', element.offsetWidth, element.offsetHeight);
+                  sendSizeToNative(element.offsetWidth, element.offsetHeight);
+                  
+                  // Also set up observer for this element
+                  if (window.ResizeObserver) {
+                    const adObserver = new ResizeObserver(entries => {
+                      console.log('Ad content ResizeObserver triggered for element', index);
+                      for (let entry of entries) {
+                        const { width, height } = entry.contentRect;
+                        console.log('Ad content size changed:', width, height);
+                        if (width > 0 && height > 0) {
+                          sendSizeToNative(width, height);
+                        }
+                      }
+                    });
+                    adObserver.observe(element);
+                    console.log('ResizeObserver set up for ad element', index);
+                  }
+                }
+              });
+            } else {
+              console.log('No ad elements found, falling back to container observation');
+              // Fallback to container observation
+              observeContainer();
+            }
+          }, 500); // Wait 500ms for ad to load
+        }
+
+        // Function to observe the container as fallback
+        function observeContainer() {
+          if (window.ResizeObserver) {
+            console.log('Setting up ResizeObserver for container');
+            const observer = new ResizeObserver(entries => {
+              console.log('Container ResizeObserver triggered', entries.length, 'entries');
+              for (let entry of entries) {
+                const { width, height } = entry.contentRect;
+                console.log('Container size changed:', width, height);
+                if (width > 0 && height > 0) {
+                  sendSizeToNative(width, height);
+                }
+              }
+            });
+            observer.observe(adContainer);
+            console.log('Container ResizeObserver set up successfully');
+          } else {
+            console.error('ResizeObserver not supported');
+          }
+        }
+
+        // Set up MutationObserver to detect when ad content is added
+        if (window.MutationObserver) {
+          console.log('Setting up MutationObserver to detect ad content');
+          const mutationObserver = new MutationObserver(mutations => {
+            let adContentAdded = false;
+            mutations.forEach(mutation => {
+              if (mutation.type === 'childList') {
+                mutation.addedNodes.forEach(node => {
+                  if (node.nodeType === Node.ELEMENT_NODE) {
+                    const isAdContent = node.tagName === 'IFRAME' || 
+                                      node.id.includes('google_ads') || 
+                                      node.id.includes('gpt') ||
+                                      node.hasAttribute('data-google-ad-client');
+                    
+                    if (isAdContent) {
+                      console.log('Ad content detected via MutationObserver:', node);
+                      adContentAdded = true;
+                    }
+                  }
+                });
+              }
+            });
+            
+            if (adContentAdded) {
+              console.log('Ad content was added, re-observing...');
+              observeAdContent();
+            }
+          });
+          
+          mutationObserver.observe(adContainer, { 
+            childList: true, 
+            subtree: true 
+          });
+          console.log('MutationObserver set up successfully');
+        }
+
+        // Start by trying to observe existing content
+        observeAdContent();
+      }
+
+      // Start monitoring when DOM is ready
+    
+      function startMonitorAdSizeWithRecheck() {
+        console.log('Starting ad size monitoring...');
+        monitorAdSize();
+        setTimeout(() => {
+          console.log('Rechecking ad size after 1 second...');
+          monitorAdSize();
+        }, 1); // Recheck after x amount of miliseconds - Still need testing if this is needed our not.
+      }
+
+      if (document.readyState === 'loading') {
+        console.log('Document still loading, waiting for DOMContentLoaded');
+        document.addEventListener('DOMContentLoaded', startMonitorAdSizeWithRecheck);
+      } else {
+        console.log('Document already loaded, starting immediately');
+        startMonitorAdSizeWithRecheck();
+      }
+    </script>
+
   <style>
     html,
     body {
@@ -47,15 +198,22 @@
         return url.searchParams.get(name);
       }
       var adUnitId = getQueryParam('adUnitId');
+      console.log('Ad unit ID:', adUnitId);
+      
       // Create the ad unit div
       var adDiv = document.createElement('div');
       adDiv.setAttribute('data-ay-manager-id', adUnitId);
       adDiv.id = adUnitId;
+      console.log('Created ad div:', adDiv);
+      
       // Append the dynamic ad unit directly to the ad-container
       document.currentScript.parentNode.insertBefore(adDiv, document.currentScript);
+      console.log('Ad div appended to container');
+      
       // Display the ad unit using AY
       window.ayManagerEnv = window.ayManagerEnv || { cmd: [] };
       window.ayManagerEnv.cmd.push(function () {
+        console.log('Displaying ad unit:', adUnitId);
         ayManagerEnv.display(adUnitId);
       });
     </script>

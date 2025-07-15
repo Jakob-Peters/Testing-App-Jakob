@@ -39,9 +39,6 @@ struct AdWebView: UIViewRepresentable {
             super.init()
         }
 
-        // MARK: - WKNavigationDelegate & WKUIDelegate methods
-        // Default navigation behavior (no forced external browser)
-
         func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
             print("AdWebView finished loading: \(webView.url?.absoluteString ?? "N/A")")
             // Inject Didomi consent sync JS after the page loads using the new pattern
@@ -53,6 +50,5 @@ struct AdWebView: UIViewRepresentable {
             #endif
         }
 
-        // ...
     }
 }
