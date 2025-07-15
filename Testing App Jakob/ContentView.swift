@@ -2,18 +2,15 @@ import SwiftUI
 import Didomi
 
 struct ContentView: View {
-    @State private var tcfString: String? = nil
     @State private var didomiReady = false
 
-    func adURL(adUnitId: String, tcfString: String?) -> URL? {
+    func adURL(adUnitId: String) -> URL? {
         var components = URLComponents(string: "https://adops.stepdev.dk/wp-content/google-test-ad.html")
         var items = [
             URLQueryItem(name: "adUnitId", value: adUnitId),
-            URLQueryItem(name: "aym_debug", value: "true")
+            URLQueryItem(name: "aym_debug", value: "true"),
+            //URLQueryItem(name: "didomiConfig.notice.enable", value: "false")
         ]
-        if let tcfString = tcfString {
-            items.append(URLQueryItem(name: "tcfString", value: tcfString))
-        }
         components?.queryItems = items
         return components?.url
     }
@@ -31,7 +28,7 @@ struct ContentView: View {
                 Text("This is some text before the first ad.")
                     .font(.body)
 
-                if didomiReady, let tcf = tcfString, let url1 = adURL(adUnitId: "div-gpt-ad-mobile_1", tcfString: tcf) {
+                if didomiReady, let url1 = adURL(adUnitId: "div-gpt-ad-mobile_1") {
                     AdWebView(url: url1)
                         .frame(height: 500)
                         .border(Color.gray, width: 1)
@@ -47,7 +44,7 @@ struct ContentView: View {
                     .font(.body)
                 .padding(.bottom, 32)
                 
-                if didomiReady, let tcf = tcfString, let url2 = adURL(adUnitId: "div-gpt-ad-mobile_2", tcfString: tcf) {
+                if didomiReady, let url2 = adURL(adUnitId: "div-gpt-ad-mobile_2") {
                     AdWebView(url: url2)
                         .frame(height: 250)
                         .border(Color.blue, width: 1)
@@ -88,13 +85,11 @@ struct ContentView: View {
             }
         }
         .onAppear {
-            // Wait for Didomi to be ready, then get the TCF string
+            // Wait for Didomi to be ready, then mark as ready (consent is injected via JS, not query string)
             if Didomi.shared.isReady() {
-                tcfString = Didomi.shared.getQueryStringForWebView() ?? ""
                 didomiReady = true
             } else {
                 Didomi.shared.onReady {
-                    tcfString = Didomi.shared.getQueryStringForWebView() ?? ""
                     didomiReady = true
                 }
             }

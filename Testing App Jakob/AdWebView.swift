@@ -1,5 +1,6 @@
 import SwiftUI
 import WebKit
+import Didomi
 
 struct AdWebView: UIViewRepresentable {
     let url: URL // The URL for your remote ad page
@@ -60,9 +61,13 @@ struct AdWebView: UIViewRepresentable {
 
         func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
             print("AdWebView finished loading: \(webView.url?.absoluteString ?? "N/A")")
-            // You can inject JavaScript here after the page loads, e.g., to pass TCF string
-            // let tcfString = "..." // Get from Didomi
-            // webView.evaluateJavaScript("window.setTcfString('\\(tcfString)');") {... } [24, 25]
+            // Inject Didomi consent sync JS after the page loads using the new pattern
+            #if canImport(Didomi)
+            Didomi.shared.onReady {
+                let didomiJavaScriptCode = Didomi.shared.getJavaScriptForWebView()
+                webView.evaluateJavaScript(didomiJavaScriptCode, completionHandler: nil)
+            }
+            #endif
         }
 
         // MARK: - WKScriptMessageHandler (for receiving messages from JavaScript)

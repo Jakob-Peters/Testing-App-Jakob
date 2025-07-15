@@ -1,151 +1,153 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <title>AssertiveYield Test Ad</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<script type="text/javascript">!function(){if(!window.location.pathname.includes("/privatlivspolitik")){function i(e){if(!window.frames[e])if(document.body&&document.body.firstChild){var t=document.body,n=document.createElement("iframe");n.style.display="none",n.name=e,n.title=e,t.insertBefore(n,t.firstChild)}else setTimeout(function(){i(e)},5)}function e(t,a,n,o,c){function e(e,t,n,i){if("function"==typeof n){window[a]||(window[a]=[]);var r=!1;c&&(r=c(e,i,n)),r||window[a].push({command:e,version:t,callback:n,parameter:i})}}function i(i){if(window[t]&&!0===window[t].stub&&i.data){var e,r="string"==typeof i.data;try{e=r?JSON.parse(i.data):i.data}catch(e){return}if(e[n]){var a=e[n];window[t](a.command,a.version,function(e,t){var n={};n[o]={returnValue:e,success:t,callId:a.callId},i.source&&i.source.postMessage(r?JSON.stringify(n):n,"*")},a.parameter)}}}e.stub=!0,e.stubVersion=2,"function"!=typeof window[t]&&(window[t]=e,window.addEventListener?window.addEventListener("message",i,!1):window.attachEvent("onmessage",i))}e("__uspapi","__uspapiBuffer","__uspapiCall","__uspapiReturn"),i("__uspapiLocator"),e("__tcfapi","__tcfapiBuffer","__tcfapiCall","__tcfapiReturn"),i("__tcfapiLocator"),function(e){var t=document.createElement("link");t.rel="preconnect",t.as="script";var n=document.createElement("link");n.rel="dns-prefetch",n.as="script";var i=document.createElement("script");i.id="spcloader",i.type="text/javascript",i.async=!0,i.charset="utf-8";var r="https://sdk.privacy-center.org/d0661bea-d696-4069-b308-11057215c4c4/loader.js?target="+document.location.hostname;if(window.didomiConfig&&window.didomiConfig.user){var a=window.didomiConfig.user,o=a.country,c=a.region;o&&(r=r+"&country="+o,c&&(r=r+"&region="+c))}t.href="https://sdk.privacy-center.org/",n.href="https://sdk.privacy-center.org/",i.src=r;var s=document.getElementsByTagName("script")[0];s.parentNode.insertBefore(t,s),s.parentNode.insertBefore(n,s),s.parentNode.insertBefore(i,s)}()}}()</script>
-
-
-    <!-- TCF and debugging -->
-    <script>
-      // In-page console: display all console.log messages in a visible HTML console
-      (function() {
-        // Create the in-page console element
-        var inPageConsole = document.createElement('div');
-        inPageConsole.id = 'inPageConsole';
-        inPageConsole.style.cssText = 'background:#111;color:#0f0;font-family:monospace;font-size:13px;padding:8px 12px;max-height:180px;overflow-y:auto;margin:8px 0 0 0;border-radius:6px;box-shadow:0 2px 8px #0003;';
-        inPageConsole.innerHTML = '<b>In-Page Console</b><hr style="border:0;border-top:1px solid #333;margin:4px 0;">';
-        document.addEventListener('DOMContentLoaded', function() {
-          var container = document.querySelector('.ad-container');
-          if (container) container.parentNode.insertBefore(inPageConsole, container);
-        });
-        // Patch console.log to filter out %c and CSS styling attributes in the in-page console
-        var oldLog = console.log;
-        function isCssString(str) {
-          // Heuristic: contains color:, background:, font-size:, border-radius:, padding:
-          return typeof str === 'string' && /color:|background:|font-size:|border-radius:|padding:|;/.test(str);
-        }
-        function stripLeadingCss(str) {
-          if (typeof str !== 'string') return str;
-          // Remove leading CSS style block if present (ends with a semicolon, then a space, then the message)
-          // Handles both single-line and multi-line CSS blocks
-          // Example: "background:...; color:...; font-size:...; Message here"
-          var cssPattern = /^([\s\S]*?;\s*)+/;
-          return str.replace(cssPattern, '');
-        }
-        console.log = function() {
-          oldLog.apply(console, arguments);
-          var args = Array.from(arguments);
-          var filtered = [];
-          for (var i = 0; i < args.length; i++) {
-            if (typeof args[i] === 'string' && args[i].startsWith('%c')) {
-              // skip this and the next argument if it's CSS
-              if (i + 1 < args.length && isCssString(args[i + 1])) {
-                i++; // skip CSS
-              }
-              // Remove %c from the string
-              var cleaned = args[i].replace(/^%c\s*/, '');
-              if (cleaned) filtered.push(stripLeadingCss(cleaned));
-            } else if (typeof args[i] === 'string') {
-              // Remove leading CSS if present
-              var cleaned = stripLeadingCss(args[i]);
-              if (cleaned) filtered.push(cleaned);
-            } else if (!isCssString(args[i])) {
-              filtered.push(args[i]);
-            }
-            // else: skip CSS style string
-          }
-          var msg = filtered.join(' ');
-          var line = document.createElement('div');
-          line.textContent = msg;
-          inPageConsole.appendChild(line);
-          inPageConsole.scrollTop = inPageConsole.scrollHeight;
-          // Forward to Swift/Xcode if available
-          if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.log) {
-            window.webkit.messageHandlers.log.postMessage(msg);
-          }
-        };
-      })();
-
-      // Read tcfString from query param and expose via __tcfapi
-      function getQueryParam(name, defaultValue) {
-        const url = new URL(window.location.href);
-        return url.searchParams.get(name) || defaultValue;
+  <meta charset="UTF-8">
+  <title>AssertiveYield Test Ad</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Didomi setup -->
+  <script>
+    
+    // Enable externalConsent for Didomi Web SDK to accept consent from native app
+    window.didomiConfig = window.didomiConfig || {};
+    window.didomiConfig.user = window.didomiConfig.user || {};
+    window.didomiConfig.user.externalConsent = { enabled: true };
+  </script>
+  <!-- Console logs for xCode and browser -->
+  <script>
+    // In-page console: display all console.log messages in a visible HTML console
+    (function () {
+      // Create the in-page console element
+      var inPageConsole = document.createElement('div');
+      inPageConsole.id = 'inPageConsole';
+      inPageConsole.style.cssText = 'background:#111;color:#0f0;font-family:monospace;font-size:13px;padding:8px 12px;max-height:180px;overflow-y:auto;margin:8px 0 0 0;border-radius:6px;box-shadow:0 2px 8px #0003;';
+      inPageConsole.innerHTML = '<b>In-Page Console</b><hr style="border:0;border-top:1px solid #333;margin:4px 0;">';
+      document.addEventListener('DOMContentLoaded', function () {
+        var container = document.querySelector('.ad-container');
+        if (container) container.parentNode.insertBefore(inPageConsole, container);
+      });
+      // Patch console.log to filter out %c and CSS styling attributes in the in-page console
+      var oldLog = console.log;
+      function isCssString(str) {
+        // Heuristic: contains color:, background:, font-size:, border-radius:, padding:
+        return typeof str === 'string' && /color:|background:|font-size:|border-radius:|padding:|;/.test(str);
       }
-      var tcfString = getQueryParam('tcfString', '');
-      window.__tcfapi = function(command, version, callback) {
-        if (command === 'getTCData') {
-          callback({ tcString: tcfString }, true);
+      function stripLeadingCss(str) {
+        if (typeof str !== 'string') return str;
+        // Remove leading CSS style block if present (ends with a semicolon, then a space, then the message)
+        // Handles both single-line and multi-line CSS blocks
+        // Example: "background:...; color:...; font-size:...; Message here"
+        var cssPattern = /^([\s\S]*?;\s*)+/;
+        return str.replace(cssPattern, '');
+      }
+      console.log = function () {
+        oldLog.apply(console, arguments);
+        var args = Array.from(arguments);
+        var filtered = [];
+        for (var i = 0; i < args.length; i++) {
+          if (typeof args[i] === 'string' && args[i].startsWith('%c')) {
+            // skip this and the next argument if it's CSS
+            if (i + 1 < args.length && isCssString(args[i + 1])) {
+              i++; // skip CSS
+            }
+            // Remove %c from the string
+            var cleaned = args[i].replace(/^%c\s*/, '');
+            if (cleaned) filtered.push(stripLeadingCss(cleaned));
+          } else if (typeof args[i] === 'string') {
+            // Remove leading CSS if present
+            var cleaned = stripLeadingCss(args[i]);
+            if (cleaned) filtered.push(cleaned);
+          } else if (!isCssString(args[i])) {
+            filtered.push(args[i]);
+          }
+          // else: skip CSS style string
+        }
+        var msg = filtered.join(' ');
+        var line = document.createElement('div');
+        line.textContent = msg;
+        inPageConsole.appendChild(line);
+        inPageConsole.scrollTop = inPageConsole.scrollHeight;
+        // Forward to Swift/Xcode if available
+        if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.log) {
+          window.webkit.messageHandlers.log.postMessage(msg);
         }
       };
-      //console.log('[TCF DEBUG] TCF string set to:', tcfString);
-      
-    </script>
-    <!-- Yield Manager tag and debug -->
-    <script src="https://AFtbN2xnQGXShTYuo.ay.delivery/manager/AFtbN2xnQGXShTYuo" type="text/javascript" referrerpolicy="no-referrer-when-downgrade">
-      //Enable AY debug via localStorage - Using QP instead in request app URL
-      //localStorage.getItem('ay_manager_debug');
-    </script>
+    })();
+    // Didomi Web SDK is loaded below. Consent is injected from the native app via JS (see iOS/Android integration docs).
+  </script>
+  <!-- Yield Manager tag and debug -->
+  <script src="https://AFtbN2xnQGXShTYuo.ay.delivery/manager/AFtbN2xnQGXShTYuo" type="text/javascript"
+    referrerpolicy="no-referrer-when-downgrade"></script>
 
-    <!-- Google Publisher Tags: Targeting for debugging -->
-    <script>  
-      // Set GPT targeting on page level using googletag.setTargeting
-      window.googletag = window.googletag || {};
-      window.googletag.cmd = window.googletag.cmd || [];
-      window.googletag.cmd.push(function() {
-        window.googletag.pubads().setTargeting('dfp_target_kv', 'alwayson-standard');
-        console.log('[GPT DEBUG] Set page-level targeting: dfp_target_kv=alwayson-standard');
+  <!-- Google Publisher Tags: Targeting for debugging -->
+  <script>
+    // Set GPT targeting on page level using googletag.setTargeting
+    window.googletag = window.googletag || {};
+    window.googletag.cmd = window.googletag.cmd || [];
+    window.googletag.cmd.push(function () {
+      window.googletag.pubads().setTargeting('dfp_target_kv', 'alwayson-standard');
+      console.log('[GPT DEBUG] Set page-level targeting: dfp_target_kv=alwayson-standard');
+    });
+  </script>
+
+  <style>
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      width: 100vw;
+      min-height: 100vh;
+      background: #fff;
+    }
+
+    .ad-container {
+      width: 100vw;
+      min-height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="ad-container"
+    style="flex-direction: column; align-items: center; justify-content: flex-start; min-height: 120px;">
+    <script type="text/javascript">
+      // Dynamically create AY ad unit div and display script based on adUnitId query param
+      function getQueryParam(name) {
+        const url = new URL(window.location.href);
+        return url.searchParams.get(name);
+      }
+      var adUnitId = getQueryParam('adUnitId');
+      console.log('[DEBUG] adUnitId from query param:', adUnitId);
+      // Create the ad unit div
+      var adDiv = document.createElement('div');
+      adDiv.setAttribute('data-ay-manager-id', adUnitId);
+      adDiv.id = adUnitId;
+      console.log('[DEBUG] Created adDiv with id and data-ay-manager-id:', adDiv.id);
+      // Append the dynamic ad unit directly to the ad-container
+      document.currentScript.parentNode.insertBefore(adDiv, document.currentScript);
+      console.log('[DEBUG] Inserted adDiv into ad-container');
+      // Display the ad unit using AY
+      window.ayManagerEnv = window.ayManagerEnv || { cmd: [] };
+      window.ayManagerEnv.cmd.push(function () {
+        console.log('[DEBUG] Calling ayManagerEnv.display with:', adUnitId);
+        ayManagerEnv.display(adUnitId);
       });
     </script>
-    
-
-<style>
-      html, body {
-        margin: 0;
-        padding: 0;
-        width: 100vw;
-        min-height: 100vh;
-        background: #fff;
-      }
-      .ad-container {
-        width: 100vw;
-        min-height: 50px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-    </style>
-</head>
-<body>
-    <div class="ad-container" style="flex-direction: column; align-items: center; justify-content: flex-start; min-height: 120px;">
-      <script type="text/javascript">
-        // Dynamically create AY ad unit div and display script based on adUnitId query param
-        function getQueryParam(name) {
-          const url = new URL(window.location.href);
-          return url.searchParams.get(name);
-        }
-        var adUnitId = getQueryParam('adUnitId');
-        console.log('[DEBUG] adUnitId from query param:', adUnitId);
-        // Create the ad unit div
-        var adDiv = document.createElement('div');
-        adDiv.setAttribute('data-ay-manager-id', adUnitId);
-        adDiv.id = adUnitId;
-        console.log('[DEBUG] Created adDiv with id and data-ay-manager-id:', adDiv.id);
-        // Append the dynamic ad unit directly to the ad-container
-        document.currentScript.parentNode.insertBefore(adDiv, document.currentScript);
-        console.log('[DEBUG] Inserted adDiv into ad-container');
-        // Display the ad unit using AY
-        window.ayManagerEnv = window.ayManagerEnv || { cmd : []};
-        window.ayManagerEnv.cmd.push(function() {
-          console.log('[DEBUG] Calling ayManagerEnv.display with:', adUnitId);
-          ayManagerEnv.display(adUnitId);
-        });
-      </script>
-</div> 
-      <div style="text-align:center; margin-top:16px;">
-        <button onclick="if(window.googletag && googletag.openConsole){googletag.openConsole();}else{alert('googletag.openConsole() is not available yet. Make sure GPT.js is loaded.');}" style="padding:8px 16px; font-size:16px; cursor:pointer;">Open Google Publisher Console</button>
-      </div>
-    </div>
+  </div>
+  <div style="text-align:center; margin-top:16px;">
+    <button
+      onclick="if(window.googletag && googletag.openConsole){googletag.openConsole();}else{alert('googletag.openConsole() is not available yet. Make sure GPT.js is loaded.');}"
+      style="padding:8px 16px; font-size:16px; cursor:pointer;">Open Google Publisher Console</button>
+  </div>
+  <script>
+  setTimeout(() => {
+    __tcfapi('getTCData', 2, function(tcdata, success) {
+      console.log(tcdata)
+      })  
+  }, 2000);
+  </script>
 </body>
 </html>
