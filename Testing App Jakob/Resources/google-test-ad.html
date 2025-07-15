@@ -5,18 +5,21 @@
   <meta charset="UTF-8">
   <title>AssertiveYield Test Ad</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- Didomi setup -->
+  <!-- Didomi web load - Override -->
+  <script type="text/javascript">(function(){function i(e){if(!window.frames[e]){if(document.body&&document.body.firstChild){var t=document.body;var n=document.createElement("iframe");n.style.display="none";n.name=e;n.title=e;t.insertBefore(n,t.firstChild)}else{setTimeout(function(){i(e)},5)}}}function e(n,o,r,f,s){function e(e,t,n,i){if(typeof n!=="function"){return}if(!window[o]){window[o]=[]}var a=false;if(s){a=s(e,i,n)}if(!a){window[o].push({command:e,version:t,callback:n,parameter:i})}}e.stub=true;e.stubVersion=2;function t(i){if(!window[n]||window[n].stub!==true){return}if(!i.data){return}var a=typeof i.data==="string";var e;try{e=a?JSON.parse(i.data):i.data}catch(t){return}if(e[r]){var o=e[r];window[n](o.command,o.version,function(e,t){var n={};n[f]={returnValue:e,success:t,callId:o.callId};if(i.source){i.source.postMessage(a?JSON.stringify(n):n,"*")}},o.parameter)}}if(typeof window[n]!=="function"){window[n]=e;if(window.addEventListener){window.addEventListener("message",t,false)}else{window.attachEvent("onmessage",t)}}}e("__tcfapi","__tcfapiBuffer","__tcfapiCall","__tcfapiReturn");i("__tcfapiLocator")})();</script><script type="text/javascript">(function(){(function(e,r){var t=document.createElement("link");t.rel="preconnect";t.as="script";var n=document.createElement("link");n.rel="dns-prefetch";n.as="script";var i=document.createElement("script");i.id="spcloader";i.type="text/javascript";i["async"]=true;i.charset="utf-8";var o="https://sdk.privacy-center.org/"+e+"/loader.js?target_type=notice&target="+r;if(window.didomiConfig&&window.didomiConfig.user){var a=window.didomiConfig.user;var c=a.country;var d=a.region;if(c){o=o+"&country="+c;if(d){o=o+"&region="+d}}}t.href="https://sdk.privacy-center.org/";n.href="https://sdk.privacy-center.org/";i.src=o;var s=document.getElementsByTagName("script")[0];s.parentNode.insertBefore(t,s);s.parentNode.insertBefore(n,s);s.parentNode.insertBefore(i,s)})("d0661bea-d696-4069-b308-11057215c4c4","QLqcgcCe")})();</script>  
+   <!-- Didomi setup -->
   <script>
-    
     // Enable externalConsent for Didomi Web SDK to accept consent from native app
     window.didomiConfig = window.didomiConfig || {};
     window.didomiConfig.user = window.didomiConfig.user || {};
     window.didomiConfig.user.externalConsent = { enabled: true };
   </script>
-  <!-- Console logs for xCode and browser -->
+  <!--
+  Console logs for xCode and browser
   <script>
     // In-page console: display all console.log messages in a visible HTML console
     (function () {
+      (function () {
       // Create the in-page console element
       var inPageConsole = document.createElement('div');
       inPageConsole.id = 'inPageConsole';
@@ -73,12 +76,15 @@
         }
       };
     })();
+    })();
     // Didomi Web SDK is loaded below. Consent is injected from the native app via JS (see iOS/Android integration docs).
   </script>
+  -->
   <!-- Yield Manager tag and debug -->
-  <script src="https://sM2jrWhrfkRNS6Bjc.ay.delivery/manager/sM2jrWhrfkRNS6Bjc" type="text/javascript" referrerpolicy="no-referrer-when-downgrade"></script>
+<script src="https://AFtbN2xnQGXShTYuo.ay.delivery/manager/AFtbN2xnQGXShTYuo" type="text/javascript" referrerpolicy="no-referrer-when-downgrade"></script>
 
-  <!-- Google Publisher Tags: Targeting for debugging -->
+  <!--
+  Google Publisher Tags: Targeting for debugging
   <script>
     // Set GPT targeting on page level using googletag.setTargeting
     window.googletag = window.googletag || {};
@@ -88,6 +94,7 @@
       console.log('[GPT DEBUG] Set page-level targeting: dfp_target_kv=alwayson-standard');
     });
   </script>
+  -->
 
   <style>
     html,
@@ -110,8 +117,7 @@
 </head>
 
 <body>
-  <div class="ad-container"
-    style="flex-direction: column; align-items: center; justify-content: flex-start; min-height: 120px;">
+  <div class="ad-container" style="width:100vw; height:100vh; min-height:100vh; min-width:100vw; padding:0; margin:0; display:flex; align-items:center; justify-content:center;">
     <script type="text/javascript">
       // Dynamically create AY ad unit div and display script based on adUnitId query param
       function getQueryParam(name) {
@@ -119,27 +125,31 @@
         return url.searchParams.get(name);
       }
       var adUnitId = getQueryParam('adUnitId');
-      console.log('[DEBUG] adUnitId from query param:', adUnitId);
+      //console.log('[DEBUG] adUnitId from query param:', adUnitId);
       // Create the ad unit div
       var adDiv = document.createElement('div');
       adDiv.setAttribute('data-ay-manager-id', adUnitId);
       adDiv.id = adUnitId;
-      console.log('[DEBUG] Created adDiv with id and data-ay-manager-id:', adDiv.id);
+      //console.log('[DEBUG] Created adDiv with id and data-ay-manager-id:', adDiv.id);
       // Append the dynamic ad unit directly to the ad-container
       document.currentScript.parentNode.insertBefore(adDiv, document.currentScript);
-      console.log('[DEBUG] Inserted adDiv into ad-container');
+      //console.log('[DEBUG] Inserted adDiv into ad-container');
       // Display the ad unit using AY
       window.ayManagerEnv = window.ayManagerEnv || { cmd: [] };
       window.ayManagerEnv.cmd.push(function () {
-        console.log('[DEBUG] Calling ayManagerEnv.display with:', adUnitId);
+        //console.log('[DEBUG] Calling ayManagerEnv.display with:', adUnitId);
         ayManagerEnv.display(adUnitId);
       });
     </script>
   </div>
+  <!--
   <div style="text-align:center; margin-top:16px;">
     <button
       onclick="if(window.googletag && googletag.openConsole){googletag.openConsole();}else{alert('googletag.openConsole() is not available yet. Make sure GPT.js is loaded.');}"
       style="padding:8px 16px; font-size:16px; cursor:pointer;">Open Google Publisher Console</button>
+    <button
+      onclick="if(window.Didomi && Didomi.reset){Didomi.reset();}else{alert('Didomi.reset() is not available yet.');}"
+      style="padding:8px 16px; font-size:16px; cursor:pointer; margin-left:12px; background:#fdd; border:1px solid #f99; color:#900;">Reset Consent (Didomi)</button>
   </div>
   <script>
   setTimeout(() => {
@@ -148,5 +158,6 @@
       })  
   }, 2000);
   </script>
+  -->
 </body>
 </html>

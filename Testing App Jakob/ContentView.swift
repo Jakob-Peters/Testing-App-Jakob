@@ -89,7 +89,7 @@ struct ContentView: View {
                     .font(.body)
 
                 UIKitAdWebView(adUrl: adURL(adUnitId: "div-gpt-ad-mobile_1"))
-                    .frame(height: 500)
+                    .frame(height: 320)
                     .border(Color.gray, width: 1)
                     .padding(.horizontal)
 
@@ -97,8 +97,8 @@ struct ContentView: View {
                     .font(.body)
                     .padding(.bottom, 32)
 
-                UIKitAdWebView(adUrl: adURL(adUnitId: "div-gpt-ad-mobile_dai"))
-                    .frame(height: 400)
+                UIKitAdWebView(adUrl: adURL(adUnitId: "div-gpt-ad-mobile_2"))
+                    .frame(height: 320)
                     .border(Color.blue, width: 1)
                     .padding(.horizontal)
 
@@ -122,6 +122,17 @@ struct ContentView: View {
                         .font(.headline)
                         .padding()
                         .background(Color.blue.opacity(0.1))
+                        .cornerRadius(8)
+                }
+                .padding(.bottom, 8)
+
+                Button(action: {
+                    Didomi.shared.clearUser()
+                }) {
+                    Text("Clear Didomi User Status")
+                        .font(.headline)
+                        .padding()
+                        .background(Color.red.opacity(0.1))
                         .cornerRadius(8)
                 }
                 .padding(.bottom, 32)
