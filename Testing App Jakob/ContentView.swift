@@ -6,18 +6,16 @@ struct ContentView: View {
     @State private var didomiReady = false
 
     func adURL(adUnitId: String, tcfString: String?) -> URL? {
-        if let fileURL = Bundle.main.url(forResource: "google-test-ad", withExtension: "html") {
-            var components = URLComponents(url: fileURL, resolvingAgainstBaseURL: false)
-            var items = [
-                URLQueryItem(name: "adUnitId", value: adUnitId)
-            ]
-            if let tcfString = tcfString {
-                items.append(URLQueryItem(name: "tcfString", value: tcfString))
-            }
-            components?.queryItems = items
-            return components?.url
+        var components = URLComponents(string: "https://adops.stepdev.dk/wp-content/google-test-ad.html")
+        var items = [
+            URLQueryItem(name: "adUnitId", value: adUnitId),
+            URLQueryItem(name: "aym_debug", value: "true")
+        ]
+        if let tcfString = tcfString {
+            items.append(URLQueryItem(name: "tcfString", value: tcfString))
         }
-        return nil
+        components?.queryItems = items
+        return components?.url
     }
 
     var body: some View {
