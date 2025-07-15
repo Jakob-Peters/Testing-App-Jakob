@@ -1,15 +1,75 @@
 import SwiftUI
+import WebKit
 import Didomi
 
-struct ContentView: View {
-    @State private var didomiReady = false
+// UIKit-based AdWebView for proper consent injection timing
+class UIKitAdWebViewController: UIViewController, WKNavigationDelegate {
+    var adUrl: URL?
+    var webView: WKWebView!
 
+    init(adUrl: URL?) {
+        self.adUrl = adUrl
+        super.init(nibName: nil, bundle: nil)
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        let webViewConfiguration = WKWebViewConfiguration()
+        webViewConfiguration.allowsInlineMediaPlayback = true
+        webViewConfiguration.mediaTypesRequiringUserActionForPlayback = []
+        webView = WKWebView(frame: view.bounds, configuration: webViewConfiguration)
+        webView.navigationDelegate = self
+        webView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        view.addSubview(webView)
+
+        // Wait for Didomi to be ready before loading the ad URL and injecting consent
+        if Didomi.shared.isReady() {
+            loadAdAndInjectConsent()
+        } else {
+            Didomi.shared.onReady { [weak self] in
+                self?.loadAdAndInjectConsent()
+            }
+        }
+    }
+
+    private func loadAdAndInjectConsent() {
+        guard let adUrl = adUrl else { return }
+        let request = URLRequest(url: adUrl)
+        webView.load(request)
+        // Inject Didomi consent JS after page load
+        webView.navigationDelegate = self
+    }
+
+    func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+        let didomiJavaScriptCode = Didomi.shared.getJavaScriptForWebView()
+        webView.evaluateJavaScript(didomiJavaScriptCode) { (result, error) in
+            if let error = error {
+                print("Error injecting Didomi JavaScript: \(error.localizedDescription)")
+            } else {
+                print("Didomi JavaScript injected successfully into WKWebView.")
+            }
+        }
+    }
+}
+
+struct UIKitAdWebView: UIViewControllerRepresentable {
+    let adUrl: URL?
+    func makeUIViewController(context: Context) -> UIKitAdWebViewController {
+        return UIKitAdWebViewController(adUrl: adUrl)
+    }
+    func updateUIViewController(_ uiViewController: UIKitAdWebViewController, context: Context) {}
+}
+
+struct ContentView: View {
     func adURL(adUnitId: String) -> URL? {
         var components = URLComponents(string: "https://adops.stepdev.dk/wp-content/google-test-ad.html")
         var items = [
             URLQueryItem(name: "adUnitId", value: adUnitId),
-            URLQueryItem(name: "aym_debug", value: "true"),
-            //URLQueryItem(name: "didomiConfig.notice.enable", value: "false")
+            URLQueryItem(name: "aym_debug", value: "true")
         ]
         components?.queryItems = items
         return components?.url
@@ -28,42 +88,25 @@ struct ContentView: View {
                 Text("This is some text before the first ad.")
                     .font(.body)
 
-                if didomiReady, let url1 = adURL(adUnitId: "div-gpt-ad-mobile_1") {
-                    AdWebView(url: url1)
-                        .frame(height: 500)
-                        .border(Color.gray, width: 1)
-                        .padding(.horizontal)
-                } else if !didomiReady {
-                    Text("Waiting for consent...")
-                } else {
-                    Text("Ad 1 failed to load.")
-                }
-                
-                
+                UIKitAdWebView(adUrl: adURL(adUnitId: "div-gpt-ad-mobile_1"))
+                    .frame(height: 500)
+                    .border(Color.gray, width: 1)
+                    .padding(.horizontal)
+
                 Text("This is some text between the ads.")
                     .font(.body)
-                .padding(.bottom, 32)
-                
-                if didomiReady, let url2 = adURL(adUnitId: "div-gpt-ad-mobile_2") {
-                    AdWebView(url: url2)
-                        .frame(height: 250)
-                        .border(Color.blue, width: 1)
-                        .padding(.horizontal)
-                } else if !didomiReady {
-                    Text("")
-                } else {
-                    Text("Ad 2 failed to load.")
-                }
+                    .padding(.bottom, 32)
+
+                UIKitAdWebView(adUrl: adURL(adUnitId: "div-gpt-ad-mobile_dai"))
+                    .frame(height: 400)
+                    .border(Color.blue, width: 1)
+                    .padding(.horizontal)
 
                 Text("This is some text after the second ad.")
                     .font(.body)
                     .padding(.bottom, 32)
-                
 
-                
-                // Add Didomi consent change button at the bottom
                 Button(action: {
-                    // Show the Didomi Preferences screen (always available after consent)
                     if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
                        let rootVC = windowScene.windows.first?.rootViewController {
                         if Didomi.shared.isReady() {
@@ -82,16 +125,6 @@ struct ContentView: View {
                         .cornerRadius(8)
                 }
                 .padding(.bottom, 32)
-            }
-        }
-        .onAppear {
-            // Wait for Didomi to be ready, then mark as ready (consent is injected via JS, not query string)
-            if Didomi.shared.isReady() {
-                didomiReady = true
-            } else {
-                Didomi.shared.onReady {
-                    didomiReady = true
-                }
             }
         }
     }
