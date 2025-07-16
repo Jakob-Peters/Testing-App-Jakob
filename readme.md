@@ -6,6 +6,8 @@
 2. **✅ FIXED - Clicking on an ad within the webview will open the link within the webview as well, as system browser.**
    - System browser redirects works now, but the webview app i also opening the clicked URL (e.g. to pages are loaded).
 
+3. ## Several link types are not working for the redirecting setup for webviews / external links.   
+   - Right now most ad types are passing along the click URL correctly for us to open in an external browser, but some (e.g. AdX demand) are not opening in the system browser.
 ---
 
 # File Overview
