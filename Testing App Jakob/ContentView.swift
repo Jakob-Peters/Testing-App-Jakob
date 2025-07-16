@@ -4,6 +4,7 @@ import Didomi
 
 // UIKit-based AdWebView for proper consent injection timing
 class UIKitAdWebViewController: UIViewController, WKNavigationDelegate, WKUIDelegate {
+    private var initialURL: URL? // Store the initial URL loaded in the webView
     var adUrl: URL?
     var webView: WKWebView!
     var onSizeChanged: ((CGSize) -> Void)?
@@ -32,6 +33,7 @@ class UIKitAdWebViewController: UIViewController, WKNavigationDelegate, WKUIDele
         webViewConfiguration.userContentController = userContentController
 
         // Inject JavaScript to capture console logs
+        
         let consoleLogScript = WKUserScript(source: """
             // Override console methods to send logs to native app
             (function() {
@@ -109,6 +111,7 @@ class UIKitAdWebViewController: UIViewController, WKNavigationDelegate, WKUIDele
 
     private func loadAdAndInjectConsent() {
         guard let adUrl = adUrl else { return }
+        self.initialURL = adUrl // Store the initial URL when it's first loaded
         let request = URLRequest(url: adUrl)
         webView.load(request)
         // Inject Didomi consent JS after page load
@@ -131,20 +134,25 @@ class UIKitAdWebViewController: UIViewController, WKNavigationDelegate, WKUIDele
 
     // MARK: - WKUIDelegate
     func webView(_ webView: WKWebView, createWebViewWith configuration: WKWebViewConfiguration, for navigationAction: WKNavigationAction, windowFeatures: WKWindowFeatures) -> WKWebView? {
-        // Handle target="_blank" and window.open
+        print("[WKUIDelegate] createWebViewWith: navigationType=\(navigationAction.navigationType.rawValue), url=\(navigationAction.request.url?.absoluteString ?? "nil"), targetFrameIsNil=\(navigationAction.targetFrame == nil)")
         if navigationAction.targetFrame == nil, let url = navigationAction.request.url {
             if handleExternalURL(navigationAction: navigationAction) {
+                print("[WKUIDelegate] Opened externally and returning nil for new webview.")
                 return nil // Opened externally, don't create a new webview
             }
         }
+        print("[WKUIDelegate] Returning nil, not handled externally.")
         return nil
     }
 
     // MARK: - WKNavigationDelegate
     func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
+        print("[WKNavigationDelegate] decidePolicyFor: navigationType=\(navigationAction.navigationType.rawValue), url=\(navigationAction.request.url?.absoluteString ?? "nil"), targetFrameIsNil=\(navigationAction.targetFrame == nil)")
         if handleExternalURL(navigationAction: navigationAction) {
+            print("[WKNavigationDelegate] Opened externally and cancelling navigation.")
             decisionHandler(.cancel)
         } else {
+            print("[WKNavigationDelegate] Allowing navigation internally.")
             decisionHandler(.allow)
         }
     }
@@ -153,34 +161,47 @@ class UIKitAdWebViewController: UIViewController, WKNavigationDelegate, WKUIDele
     /// Determines if a URL should be opened externally and handles the opening.
     /// Returns true if the URL was handled externally, false otherwise.
     private func handleExternalURL(navigationAction: WKNavigationAction) -> Bool {
-        guard let targetURL = navigationAction.request.url else { return false }
+        guard let targetURL = navigationAction.request.url else {
+            print("[handleExternalURL] No target URL, allowing internally.")
+            return false
+        }
+
+        print("[handleExternalURL] navigationType=\(navigationAction.navigationType.rawValue), url=\(targetURL.absoluteString), targetFrameIsNil=\(navigationAction.targetFrame == nil)")
 
         // 1. Always allow non-HTTP/HTTPS schemes to open externally (e.g., tel, mailto, app-specific deep links)
         if let scheme = targetURL.scheme, !["http", "https"].contains(scheme.lowercased()) {
+            print("[handleExternalURL] Non-http(s) scheme detected, opening externally: \(scheme)")
             UIApplication.shared.open(targetURL, options: [:], completionHandler: nil)
             return true
         }
 
-        // Get the current web view's URL for domain comparison.
-        guard let currentWebViewURL = webView.url, let currentDomain = currentWebViewURL.host else {
-            // If current domain is unknown, allow internal loading for non-user-initiated actions.
+        // Use the initial loaded URL for domain comparison
+        guard let initialLoadedURL = self.initialURL, let initialDomain = initialLoadedURL.host else {
+            if navigationAction.targetFrame == nil {
+                print("[handleExternalURL] No initialURL, but new window request. Opening externally.")
+                UIApplication.shared.open(targetURL, options: [:], completionHandler: nil)
+                return true
+            }
+            print("[handleExternalURL] No initialURL, allowing internally.")
             return false
         }
         guard let targetDomain = targetURL.host else {
-            // If target domain is missing, allow internal loading.
+            print("[handleExternalURL] No target domain, allowing internally.")
             return false
         }
 
-        // Infer user intent: user clicked a link or window.open/target=_blank
-        let isUserInitiatedLikeAction = (navigationAction.navigationType == .linkActivated || navigationAction.targetFrame == nil)
-        let isDifferentDomain = currentDomain != targetDomain
+        let isMainFrameNavigation = navigationAction.targetFrame?.isMainFrame == true
+        let isDifferentFromInitialDomain = initialDomain != targetDomain
 
-        if isUserInitiatedLikeAction && isDifferentDomain {
+        print("[handleExternalURL] initialDomain=\(initialDomain), targetDomain=\(targetDomain), isMainFrameNavigation=\(isMainFrameNavigation), isDifferentFromInitialDomain=\(isDifferentFromInitialDomain)")
+
+        if isMainFrameNavigation && isDifferentFromInitialDomain {
+            print("[handleExternalURL] Main frame navigation to different domain. Opening externally: \(targetURL.absoluteString)")
             UIApplication.shared.open(targetURL, options: [:], completionHandler: nil)
             return true
         }
 
-        // If not a user-initiated-like action to a different domain, allow WKWebView to handle it internally.
+        print("[handleExternalURL] Allowing navigation internally.")
         return false
     }
 }

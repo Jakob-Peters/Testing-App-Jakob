@@ -3,12 +3,10 @@
 1. **First / Initial page view will not load ads, since the consent isn't set by the user on the first page view.**
    - The Didomi SDK must collect consent before the TCF string is available. The ad webview is loaded before consent is set, so the ad unit will not render on the first load. After the user provides consent, subsequent loads will work as expected.
 
-2. **Clicking on an ad within the webview will open the link within the webview as well, as system browser.**
+2. **✅ FIXED - Clicking on an ad within the webview will open the link within the webview as well, as system browser.**
    - System browser redirects works now, but the webview app i also opening the clicked URL (e.g. to pages are loaded).
 
 ---
-If you see "Multiple commands produce" errors, check your Xcode target's Copy Bundle Resources for duplicate or unnecessary files and remove them.
-The app is SwiftUI-based and does not use storyboards; you can remove Main.storyboard if not needed.
 
 # File Overview
 
