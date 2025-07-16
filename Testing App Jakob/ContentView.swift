@@ -3,7 +3,7 @@ import WebKit
 import Didomi
 
 // UIKit-based AdWebView for proper consent injection timing
-class UIKitAdWebViewController: UIViewController, WKNavigationDelegate {
+class UIKitAdWebViewController: UIViewController, WKNavigationDelegate, WKUIDelegate {
     var adUrl: URL?
     var webView: WKWebView!
     var onSizeChanged: ((CGSize) -> Void)?
@@ -23,13 +23,14 @@ class UIKitAdWebViewController: UIViewController, WKNavigationDelegate {
         let webViewConfiguration = WKWebViewConfiguration()
         webViewConfiguration.allowsInlineMediaPlayback = true
         webViewConfiguration.mediaTypesRequiringUserActionForPlayback = []
-        
+        webViewConfiguration.preferences.javaScriptCanOpenWindowsAutomatically = true // Allow JS window.open
+
         // Add user content controller for size communication and console logging
         let userContentController = WKUserContentController()
         userContentController.add(self, name: "sizeHandler")
         userContentController.add(self, name: "consoleLog")
         webViewConfiguration.userContentController = userContentController
-        
+
         // Inject JavaScript to capture console logs
         let consoleLogScript = WKUserScript(source: """
             // Override console methods to send logs to native app
@@ -39,7 +40,6 @@ class UIKitAdWebViewController: UIViewController, WKNavigationDelegate {
                 const originalWarn = console.warn;
                 const originalInfo = console.info;
                 const originalDebug = console.debug;
-                
                 function sendToNative(level, args) {
                     const message = Array.from(args).map(arg => {
                         if (typeof arg === 'object') {
@@ -51,7 +51,6 @@ class UIKitAdWebViewController: UIViewController, WKNavigationDelegate {
                         }
                         return String(arg);
                     }).join(' ');
-                    
                     if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.consoleLog) {
                         window.webkit.messageHandlers.consoleLog.postMessage({
                             level: level,
@@ -60,48 +59,41 @@ class UIKitAdWebViewController: UIViewController, WKNavigationDelegate {
                         });
                     }
                 }
-                
                 console.log = function(...args) {
                     originalLog.apply(console, args);
                     sendToNative('log', args);
                 };
-                
                 console.error = function(...args) {
                     originalError.apply(console, args);
                     sendToNative('error', args);
                 };
-                
                 console.warn = function(...args) {
                     originalWarn.apply(console, args);
                     sendToNative('warn', args);
                 };
-                
                 console.info = function(...args) {
                     originalInfo.apply(console, args);
                     sendToNative('info', args);
                 };
-                
                 console.debug = function(...args) {
                     originalDebug.apply(console, args);
                     sendToNative('debug', args);
                 };
-                
                 // Also capture uncaught errors
                 window.addEventListener('error', function(e) {
                     sendToNative('error', ['Uncaught Error:', e.message, 'at', e.filename + ':' + e.lineno + ':' + e.colno]);
                 });
-                
                 // Capture unhandled promise rejections
                 window.addEventListener('unhandledrejection', function(e) {
                     sendToNative('error', ['Unhandled Promise Rejection:', e.reason]);
                 });
             })();
         """, injectionTime: .atDocumentStart, forMainFrameOnly: false)
-        
         userContentController.addUserScript(consoleLogScript)
-        
+
         webView = WKWebView(frame: view.bounds, configuration: webViewConfiguration)
         webView.navigationDelegate = self
+        webView.uiDelegate = self // Set the UI delegate
         webView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         view.addSubview(webView)
 
@@ -121,6 +113,7 @@ class UIKitAdWebViewController: UIViewController, WKNavigationDelegate {
         webView.load(request)
         // Inject Didomi consent JS after page load
         webView.navigationDelegate = self
+        webView.uiDelegate = self
     }
 
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
@@ -132,9 +125,63 @@ class UIKitAdWebViewController: UIViewController, WKNavigationDelegate {
                 print("Didomi JavaScript injected successfully into WKWebView.")
             }
         }
-        
         // The size monitoring is now handled directly in the HTML file
         print("WebView finished loading. Size monitoring is active in HTML.")
+    }
+
+    // MARK: - WKUIDelegate
+    func webView(_ webView: WKWebView, createWebViewWith configuration: WKWebViewConfiguration, for navigationAction: WKNavigationAction, windowFeatures: WKWindowFeatures) -> WKWebView? {
+        // Handle target="_blank" and window.open
+        if navigationAction.targetFrame == nil, let url = navigationAction.request.url {
+            if handleExternalURL(navigationAction: navigationAction) {
+                return nil // Opened externally, don't create a new webview
+            }
+        }
+        return nil
+    }
+
+    // MARK: - WKNavigationDelegate
+    func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
+        if handleExternalURL(navigationAction: navigationAction) {
+            decisionHandler(.cancel)
+        } else {
+            decisionHandler(.allow)
+        }
+    }
+
+    // MARK: - External URL Handling
+    /// Determines if a URL should be opened externally and handles the opening.
+    /// Returns true if the URL was handled externally, false otherwise.
+    private func handleExternalURL(navigationAction: WKNavigationAction) -> Bool {
+        guard let targetURL = navigationAction.request.url else { return false }
+
+        // 1. Always allow non-HTTP/HTTPS schemes to open externally (e.g., tel, mailto, app-specific deep links)
+        if let scheme = targetURL.scheme, !["http", "https"].contains(scheme.lowercased()) {
+            UIApplication.shared.open(targetURL, options: [:], completionHandler: nil)
+            return true
+        }
+
+        // Get the current web view's URL for domain comparison.
+        guard let currentWebViewURL = webView.url, let currentDomain = currentWebViewURL.host else {
+            // If current domain is unknown, allow internal loading for non-user-initiated actions.
+            return false
+        }
+        guard let targetDomain = targetURL.host else {
+            // If target domain is missing, allow internal loading.
+            return false
+        }
+
+        // Infer user intent: user clicked a link or window.open/target=_blank
+        let isUserInitiatedLikeAction = (navigationAction.navigationType == .linkActivated || navigationAction.targetFrame == nil)
+        let isDifferentDomain = currentDomain != targetDomain
+
+        if isUserInitiatedLikeAction && isDifferentDomain {
+            UIApplication.shared.open(targetURL, options: [:], completionHandler: nil)
+            return true
+        }
+
+        // If not a user-initiated-like action to a different domain, allow WKWebView to handle it internally.
+        return false
     }
 }
 
