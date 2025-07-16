@@ -214,13 +214,13 @@ extension UIKitAdWebViewController: WKScriptMessageHandler {
                let width = sizeData["width"] as? Double,
                let height = sizeData["height"] as? Double {
                 let size = CGSize(width: width, height: height)
-                print("Received ad size update: \(size)")
+                //print("Received ad size update: \(size)")
                 DispatchQueue.main.async {
                     self.onSizeChanged?(size)
                 }
             } else {
                 print("Invalid size data received: \(message.body)")
-            }
+            } 
         } else if message.name == "consoleLog" {
             if let logData = message.body as? [String: Any],
                let level = logData["level"] as? String,
