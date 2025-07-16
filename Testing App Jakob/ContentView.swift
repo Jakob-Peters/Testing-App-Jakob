@@ -2,12 +2,63 @@ import SwiftUI
 import WebKit
 import Didomi
 
+// MARK: - Article Model
+struct Article: Identifiable {
+    let id: Int
+    let title: String
+    let preview: String
+    let content: [String] // Each string is a paragraph
+}
+
+let articles: [Article] = [
+    Article(
+        id: 1,
+        title: "Page 1: SwiftUI Navigation",
+        preview: "Learn about navigation in SwiftUI and how to structure your app.",
+        content: [
+            "SwiftUI makes navigation easy with NavigationStack.",
+            "You can create multiple pages and navigate between them.",
+            "Each page can have its own content and layout.",
+            "Navigation is type-safe and works well with data models.",
+            "You can use NavigationLink to push new views onto the stack.",
+            "Let's see how ads can be integrated between article sections."
+        ]
+    ),
+    Article(
+        id: 2,
+        title: "Page 2: Integrating Ads",
+        preview: "How to place ad units within your article content.",
+        content: [
+            "Ad units can be placed anywhere in your SwiftUI view hierarchy.",
+            "It's common to show ads between paragraphs or sections.",
+            "You can use custom ad views or UIKit wrappers.",
+            "Make sure to respect user consent and privacy.",
+            "Test ad placement on different devices and screen sizes.",
+            "Now, let's see two ad units in this article."
+        ]
+    ),
+    Article(
+        id: 3,
+        title: "Page 3: Best Practices",
+        preview: "Tips for a great user experience with ads and navigation.",
+        content: [
+            "Keep navigation simple and intuitive for users.",
+            "Don't overload pages with too many ads.",
+            "Use clear labels and previews for articles.",
+            "Test navigation flows for edge cases.",
+            "Monitor ad performance and user engagement.",
+            "Balance content and monetization for best results."
+        ]
+    )
+]
+
 // UIKit-based AdWebView for proper consent injection timing
 class UIKitAdWebViewController: UIViewController, WKNavigationDelegate, WKUIDelegate {
     private var initialURL: URL? // Store the initial URL loaded in the webView
     var adUrl: URL?
     var webView: WKWebView!
     var onSizeChanged: ((CGSize) -> Void)?
+    private var hasUserInteracted: Bool = false
 
     init(adUrl: URL?, onSizeChanged: @escaping (CGSize) -> Void) {
         self.adUrl = adUrl
@@ -18,9 +69,28 @@ class UIKitAdWebViewController: UIViewController, WKNavigationDelegate, WKUIDele
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+    
+    deinit {
+        print("UIKitAdWebViewController deinit - webview being deallocated")
+        webView?.stopLoading()
+        webView?.removeFromSuperview()
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        setupWebView()
+        
+        // Wait for Didomi to be ready before loading the ad URL and injecting consent
+        if Didomi.shared.isReady() {
+            loadAdAndInjectConsent()
+        } else {
+            Didomi.shared.onReady { [weak self] in
+                self?.loadAdAndInjectConsent()
+            }
+        }
+    }
+    
+    private func setupWebView() {
         let webViewConfiguration = WKWebViewConfiguration()
         webViewConfiguration.allowsInlineMediaPlayback = true
         webViewConfiguration.mediaTypesRequiringUserActionForPlayback = []
@@ -98,15 +168,6 @@ class UIKitAdWebViewController: UIViewController, WKNavigationDelegate, WKUIDele
         webView.uiDelegate = self // Set the UI delegate
         webView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         view.addSubview(webView)
-
-        // Wait for Didomi to be ready before loading the ad URL and injecting consent
-        if Didomi.shared.isReady() {
-            loadAdAndInjectConsent()
-        } else {
-            Didomi.shared.onReady { [weak self] in
-                self?.loadAdAndInjectConsent()
-            }
-        }
     }
 
     private func loadAdAndInjectConsent() {
@@ -114,9 +175,7 @@ class UIKitAdWebViewController: UIViewController, WKNavigationDelegate, WKUIDele
         self.initialURL = adUrl // Store the initial URL when it's first loaded
         let request = URLRequest(url: adUrl)
         webView.load(request)
-        // Inject Didomi consent JS after page load
-        webView.navigationDelegate = self
-        webView.uiDelegate = self
+        print("Loading ad: \(adUrl.absoluteString)")
     }
 
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
@@ -246,12 +305,135 @@ struct UIKitAdWebView: UIViewControllerRepresentable {
     }
     
     func updateUIViewController(_ uiViewController: UIKitAdWebViewController, context: Context) {}
+    
+    static func dismantleUIViewController(_ uiViewController: UIKitAdWebViewController, coordinator: ()) {
+        print("UIKitAdWebView being dismantled")
+        uiViewController.webView?.stopLoading()
+        uiViewController.webView?.removeFromSuperview()
+    }
 }
 
 struct ContentView: View {
-    @State private var adSize1 = CGSize(width: 320, height: 250) // Default banner size
-    @State private var adSize2 = CGSize(width: 320, height: 250) // Default banner size
+    @State private var path: [Int] = [] // Navigation path (article IDs)
+    @State private var adSizeFront = CGSize(width: 320, height: 250)
+    @State private var frontPageAdKey = UUID() // Key to force webview recreation
+    private let didomiEventListener = EventListener()
+
+    func adURL(adUnitId: String) -> URL? {
+        var components = URLComponents(string: "https://adops.stepdev.dk/wp-content/google-test-ad.html")
+        var items = [
+            URLQueryItem(name: "adUnitId", value: adUnitId),
+            URLQueryItem(name: "aym_debug", value: "true")
+        ]
+        components?.queryItems = items
+        return components?.url
+    }
+
+    var body: some View {
+        NavigationStack(path: $path) {
+            ScrollView {
+                VStack(spacing: 24) {
+                    DidomiWrapper()
+                        .frame(width: 0, height: 0)
+
+                    // Front page ad - only show when on front page
+                    if path.isEmpty {
+                        UIKitAdWebView(adUrl: adURL(adUnitId: "div-gpt-ad-mobile_1"), adSize: $adSizeFront)
+                            .frame(width: adSizeFront.width, height: max(adSizeFront.height, 100))
+                            .border(Color.gray, width: 1)
+                            .padding(.top, 24)
+                            .id(frontPageAdKey) // Force recreation with new key
+                    }
+
+                    Text("Welcome! Choose an article to read:")
+                        .font(.title2)
+                        .padding(.top, 8)
+
+                    // Article previews
+                    ForEach(articles) { article in
+                        NavigationLink(value: article.id) {
+                            VStack(alignment: .leading, spacing: 6) {
+                                Text(article.title)
+                                    .font(.headline)
+                                    .foregroundColor(.primary)
+                                Text(article.preview)
+                                    .font(.subheadline)
+                                    .foregroundColor(.secondary)
+                            }
+                            .padding()
+                            .background(Color(.systemGray6))
+                            .cornerRadius(10)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 10)
+                                    .stroke(Color.blue.opacity(0.2), lineWidth: 1)
+                            )
+                        }
+                        .buttonStyle(PlainButtonStyle())
+                    }
+                    
+                    // Add consent button
+                    Button(action: {
+                        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+                           let rootVC = windowScene.windows.first?.rootViewController {
+                            if Didomi.shared.isReady() {
+                                Didomi.shared.showPreferences(controller: rootVC)
+                            } else {
+                                Didomi.shared.onReady {
+                                    Didomi.shared.showPreferences(controller: rootVC)
+                                }
+                            }
+                        }
+                    }) {
+                        Text("Change Consent (Didomi)")
+                            .font(.headline)
+                            .padding()
+                            .background(Color.blue.opacity(0.1))
+                            .cornerRadius(8)
+                    }
+                    .padding(.top, 16)
+                    
+                    Spacer(minLength: 32)
+                }
+                .padding(.horizontal)
+            }
+            .navigationTitle("Front Page")
+            .navigationDestination(for: Int.self) { articleId in
+                if let article = articles.first(where: { $0.id == articleId }) {
+                    ArticleView(article: article)
+                } else {
+                    Text("Article not found.")
+                }
+            }
+            .onAppear {
+                // Regenerate key when returning to front page to force webview recreation
+                frontPageAdKey = UUID()
+            }
+        }
+        .onAppear {
+            // Set up Didomi event listener for consent changes
+            setupDidomiEventListener()
+        }
+    }
     
+    private func setupDidomiEventListener() {
+        // Set up the consent changed event listener
+        didomiEventListener.onConsentChanged = { event in
+            print("Didomi consent status changed")
+            NotificationCenter.default.post(name: NSNotification.Name("ConsentUpdated"), object: nil)
+        }
+        
+        // Add the event listener to Didomi
+        Didomi.shared.addEventListener(listener: didomiEventListener)
+    }
+}
+
+struct ArticleView: View {
+    let article: Article
+    @State private var adSize1 = CGSize(width: 320, height: 250)
+    @State private var adSize2 = CGSize(width: 320, height: 250)
+    @State private var adKey1 = UUID() // Key to force webview recreation
+    @State private var adKey2 = UUID() // Key to force webview recreation
+
     func adURL(adUnitId: String) -> URL? {
         var components = URLComponents(string: "https://adops.stepdev.dk/wp-content/google-test-ad.html")
         var items = [
@@ -264,55 +446,45 @@ struct ContentView: View {
 
     var body: some View {
         ScrollView {
-            VStack(spacing: 32) {
-                DidomiWrapper()
-                    .frame(width: 0, height: 0)
-
-                Text("Welcome to the Ad Tech Testbed!")
+            VStack(alignment: .leading, spacing: 16) {
+                Text(article.title)
                     .font(.title)
-                    .padding(.top, 32)
+                    .padding(.top, 16)
 
-                Text("This is some text before the first ad.")
-                    .font(.body)
+                // First half of article text
+                ForEach(article.content.prefix(3), id: \.self) { paragraph in
+                    Text(paragraph)
+                        .font(.body)
+                }
 
+                // First ad
                 UIKitAdWebView(adUrl: adURL(adUnitId: "div-gpt-ad-mobile_1"), adSize: $adSize1)
                     .frame(width: adSize1.width, height: max(adSize1.height, 100))
                     .border(Color.gray, width: 1)
-                    .padding(.horizontal)
+                    .id(adKey1) // Force recreation with new key
 
-                Text("This is some text between the ads.")
-                    .font(.body)
-                    .padding(.bottom, 32)
+                // Second half of article text
+                ForEach(article.content.suffix(from: 3), id: \.self) { paragraph in
+                    Text(paragraph)
+                        .font(.body)
+                }
 
+                // Second ad
                 UIKitAdWebView(adUrl: adURL(adUnitId: "div-gpt-ad-mobile_2"), adSize: $adSize2)
                     .frame(width: adSize2.width, height: max(adSize2.height, 100))
                     .border(Color.blue, width: 1)
-                    .padding(.horizontal)
+                    .id(adKey2) // Force recreation with new key
 
-                Text("This is some text after the second ad.")
-                    .font(.body)
-                    .padding(.bottom, 32)
-
-                Button(action: {
-                    if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-                       let rootVC = windowScene.windows.first?.rootViewController {
-                        if Didomi.shared.isReady() {
-                            Didomi.shared.showPreferences(controller: rootVC)
-                        } else {
-                            Didomi.shared.onReady {
-                                Didomi.shared.showPreferences(controller: rootVC)
-                            }
-                        }
-                    }
-                }) {
-                    Text("Change Consent (Didomi)")
-                        .font(.headline)
-                        .padding()
-                        .background(Color.blue.opacity(0.1))
-                        .cornerRadius(8)
-                }
-                .padding(.bottom, 8)
+                Spacer(minLength: 32)
             }
+            .padding(.horizontal)
+        }
+        .navigationTitle(article.title)
+        .navigationBarTitleDisplayMode(.inline)
+        .onAppear {
+            // Regenerate keys when article appears to force webview recreation
+            adKey1 = UUID()
+            adKey2 = UUID()
         }
     }
 }
