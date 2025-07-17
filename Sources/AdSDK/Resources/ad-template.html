@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AssertiveYield Test Ad</title>
+    
+    <!-- Didomi web load - TCF API stub -->
+    <script type="text/javascript">(function(){function i(e){if(!window.frames[e]){if(document.body&&document.body.firstChild){var t=document.body;var n=document.createElement("iframe");n.style.display="none";n.name=e;n.title=e;t.insertBefore(n,t.firstChild)}else{setTimeout(function(){i(e)},5)}}}function e(n,o,r,f,s){function e(e,t,n,i){if(typeof n!=="function"){return}if(!window[o]){window[o]=[]}var a=false;if(s){a=s(e,i,n)}if(!a){window[o].push({command:e,version:t,callback:n,parameter:i})}}e.stub=true;e.stubVersion=2;function t(i){if(!window[n]||window[n].stub!==true){return}if(!i.data){return}var a=typeof i.data==="string";var e;try{e=a?JSON.parse(i.data):i.data}catch(t){return}if(e[r]){var o=e[r];window[n](o.command,o.version,function(e,t){var n={};n[f]={returnValue:e,success:t,callId:o.callId};if(i.source){i.source.postMessage(a?JSON.stringify(n):n,"*")}},o.parameter)}}if(typeof window[n]!=="function"){window[n]=e;if(window.addEventListener){window.addEventListener("message",t,false)}else{window.attachEvent("onmessage",t)}}}e("__tcfapi","__tcfapiBuffer","__tcfapiCall","__tcfapiReturn");i("__tcfapiLocator")})();</script>
+    
+    <!-- Didomi CMP tag -->
+    <script type="text/javascript">(function(){(function(e,r){var t=document.createElement("link");t.rel="preconnect";t.as="script";var n=document.createElement("link");n.rel="dns-prefetch";n.as="script";var i=document.createElement("script");i.id="spcloader";i.type="text/javascript";i["async"]=true;i.charset="utf-8";var o="https://sdk.privacy-center.org/"+e+"/loader.js?target_type=notice&target="+r;if(window.didomiConfig&&window.didomiConfig.user){var a=window.didomiConfig.user;var c=a.country;var d=a.region;if(c){o=o+"&country="+c;if(d){o=o+"&region="+d}}}t.href="https://sdk.privacy-center.org/";n.href="https://sdk.privacy-center.org/";i.src=o;var s=document.getElementsByTagName("script")[0];s.parentNode.insertBefore(t,s);s.parentNode.insertBefore(n,s);s.parentNode.insertBefore(i,s)})("d0661bea-d696-4069-b308-11057215c4c4","QLqcgcCe")})();</script>
+    
+    <!-- Didomi setup -->
+    <script type="text/javascript">
+        // Enable externalConsent for Didomi Web SDK to accept consent from native app
+        window.didomiConfig = window.didomiConfig || {};
+        window.didomiConfig.user = window.didomiConfig.user || {};
+        window.didomiConfig.user.externalConsent = { enabled: true };
+        
+        // Debug mode configuration
+        const urlParams = new URLSearchParams(window.location.search);
+        const debugMode = urlParams.get('aym_debug') === 'true' || urlParams.get('debug') === 'true';
+        
+        if (debugMode) {
+            console.log('🔍 AdSDK Debug Mode Enabled');
+            console.log('🔧 URL Parameters:', Object.fromEntries(urlParams));
+            console.log('🎯 Didomi Config:', window.didomiConfig)
+
+        }
+    </script>
+    
+    <!-- Yield Manager tag -->
+    <script type="text/javascript">
+        // Get yield manager ID from URL parameters
+        const yieldManagerId = urlParams.get('yield_manager') || 'AFtbN2xnQGXShTYuo';
+        
+        if (debugMode) {
+            console.log('🔧 Loading Yield Manager:', yieldManagerId);
+        }
+        
+        // Create and load yield manager script
+        const yieldManagerScript = document.createElement('script');
+        yieldManagerScript.src = 'https://' + yieldManagerId + '.ay.delivery/manager/' + yieldManagerId;
+        yieldManagerScript.type = 'text/javascript';
+        yieldManagerScript.setAttribute('referrerpolicy', 'no-referrer-when-downgrade');
+        
+        document.head.appendChild(yieldManagerScript);
+        
+        if (debugMode) {
+            yieldManagerScript.onload = function() {
+                console.log('✅ Yield Manager loaded:', yieldManagerId);
+            };
+            yieldManagerScript.onerror = function() {
+                console.error('❌ Failed to load Yield Manager:', yieldManagerId);
+            };
+        }
+    </script>
+    
+    <!-- Ad Size Monitoring System -->
+    <script type="text/javascript">
+        // Size monitoring function
+        function monitorAdSize() {
+            if (debugMode) {
+                console.log('🔍 Starting ad size monitoring...');
+            }
+            
+            const adContainer = document.querySelector('.ad-container');
+            if (!adContainer) {
+                console.error('❌ Ad container not found');
+                return;
+            }
+            
+            if (debugMode) {
+                console.log('✅ Ad container found:', adContainer);
+                console.log('📏 Ad container dimensions:', adContainer.getBoundingClientRect());
+            }
+
+            // Function to send size to native app
+            function sendSizeToNative(width, height) {
+                const sizeData = {
+                    width: width,
+                    height: height,
+                    timestamp: new Date().toISOString(),
+                    url: window.location.href
+                };
+                
+                if (debugMode) {
+                    console.log('📏 Sending size to native:', sizeData);
+                }
+                
+                if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.sizeHandler) {
+                    window.webkit.messageHandlers.sizeHandler.postMessage(sizeData);
+                    if (debugMode) {
+                        console.log('✅ Size sent to native successfully');
+                    }
+                } else {
+                    if (debugMode) {
+                        console.warn('⚠️  Native message handler not available');
+                    }
+                }
+            }
+
+            // Function to observe actual ad content
+            function observeAdContent() {
+                
+                // Wait a bit for the ad to fully load
+                setTimeout(() => {
+                    const adElements = adContainer.querySelectorAll('iframe, div[id*="google_ads"], div[id*="gpt"], div[data-google-ad-client]');
+                    
+                    
+                    if (adElements.length > 0) {
+                        adElements.forEach((element, index) => {
+                            
+                            if (element.offsetWidth > 0 && element.offsetHeight > 0) {
+                                if (debugMode) {
+                                    console.log('📏 Sending ad content size:', element.offsetWidth, element.offsetHeight);
+                                }
+                                sendSizeToNative(element.offsetWidth, element.offsetHeight);
+                                
+                                // Also set up observer for this element
+                                if (window.ResizeObserver) {
+                                    const adObserver = new ResizeObserver(entries => {
+                                        if (debugMode) {
+                                            console.log('🔍 Ad content ResizeObserver triggered for element ' + index);
+                                        }
+                                        for (let entry of entries) {
+                                            const { width, height } = entry.contentRect;
+                                            if (debugMode) {
+                                                console.log('📏 Ad content size changed:', width, height);
+                                            }
+                                            if (width > 0 && height > 0) {
+                                                sendSizeToNative(width, height);
+                                            }
+                                        }
+                                    });
+                                    adObserver.observe(element);
+                                    if (debugMode) {
+                                        console.log('✅ ResizeObserver set up for ad element ' + index);
+                                    }
+                                }
+                            }
+                        });
+                    } else {
+                        if (debugMode) {
+                            console.log('⚠️  No ad elements found, falling back to container observation');
+                        }
+                        // Fallback to container observation
+                        observeContainer();
+                    }
+                }, 500); // Wait 500ms for ad to load
+            }
+
+            // Function to observe the container as fallback
+            function observeContainer() {
+                if (window.ResizeObserver) {
+                    if (debugMode) {
+                        console.log('🔍 Setting up ResizeObserver for container');
+                    }
+                    const observer = new ResizeObserver(entries => {
+                        if (debugMode) {
+                            console.log('🔍 Container ResizeObserver triggered', entries.length, 'entries');
+                        }
+                        for (let entry of entries) {
+                            const { width, height } = entry.contentRect;
+                            if (debugMode) {
+                                console.log('📏 Container size changed:', width, height);
+                            }
+                            if (width > 0 && height > 0) {
+                                sendSizeToNative(width, height);
+                            }
+                        }
+                    });
+                    observer.observe(adContainer);
+                    if (debugMode) {
+                        console.log('✅ Container ResizeObserver set up successfully');
+                    }
+                } else {
+                    console.error('❌ ResizeObserver not supported');
+                }
+            }
+
+            // Set up MutationObserver to detect when ad content is added
+            if (window.MutationObserver) {
+                if (debugMode) {
+                    console.log('🔍 Setting up MutationObserver to detect ad content');
+                }
+                const mutationObserver = new MutationObserver(mutations => {
+                    let adContentAdded = false;
+                    mutations.forEach(mutation => {
+                        if (mutation.type === 'childList') {
+                            mutation.addedNodes.forEach(node => {
+                                if (node.nodeType === Node.ELEMENT_NODE) {
+                                    const isAdContent = node.tagName === 'IFRAME' || 
+                                                      node.id.includes('google_ads') || 
+                                                      node.id.includes('gpt') ||
+                                                      node.hasAttribute('data-google-ad-client');
+                                    
+                                    if (isAdContent) {
+                                        if (debugMode) {
+                                            console.log('🔍 Ad content detected via MutationObserver:', node);
+                                        }
+                                        adContentAdded = true;
+                                    }
+                                }
+                            });
+                        }
+                    });
+                    
+                    if (adContentAdded) {
+                        if (debugMode) {
+                            console.log('✅ Ad content was added, re-observing...');
+                        }
+                        observeAdContent();
+                    }
+                });
+                
+                mutationObserver.observe(adContainer, { 
+                    childList: true, 
+                    subtree: true 
+                });
+                
+                if (debugMode) {
+                    console.log('✅ MutationObserver set up successfully');
+                }
+            }
+
+            // Start by trying to observe existing content
+            observeAdContent();
+        }
+
+        // Start monitoring when DOM is ready
+        function startMonitorAdSizeWithRecheck() {
+            if (debugMode) {
+                console.log('🔍 Starting ad size monitoring...');
+            }
+            monitorAdSize();
+            setTimeout(() => {
+                if (debugMode) {
+                    console.log('🔍 Rechecking ad size after 1 second...');
+                }
+                monitorAdSize();
+            }, 1); // Recheck after 1ms
+        }
+
+        if (document.readyState === 'loading') {
+            if (debugMode) {
+                console.log('📄 Document still loading, waiting for DOMContentLoaded');
+            }
+            document.addEventListener('DOMContentLoaded', startMonitorAdSizeWithRecheck);
+        } else {
+            if (debugMode) {
+                console.log('📄 Document already loaded, starting immediately');
+            }
+            startMonitorAdSizeWithRecheck();
+        }
+    </script>
+    
+    <!-- Responsive Styling -->
+    <style>
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            width: 100vw;
+            min-height: 100vh;
+            background: #fff;
+        }
+
+        .ad-container {
+            width: 100vw;
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* Debug styles */
+        .debug-info {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-family: monospace;
+            z-index: 9999;
+            display: none;
+        }
+        
+        .debug-info.visible {
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Debug Info Panel -->
+    <div id="debugInfo" class="debug-info">
+        <div>AdSDK Debug Mode</div>
+        <div id="debugStatus">Initializing...</div>
+        <div id="debugSize">Size: Unknown</div>
+
+        <!-- Google Publisher Console knap start -->
+        <div id="GoogleButton">
+            <a href="#" id="bookmarklet-button">Console</a>    
+            <script>
+            document.getElementById('bookmarklet-button').addEventListener('click', function(event) {
+                event.preventDefault();
+                googletag.openConsole();
+            });
+            </script>
+        </div>
+<!-- Google Publisher Console knap end -->
+    </div>
+    
+    <!-- Main Ad Container -->
+    <div class="ad-container" style="width:100vw; height:100vh; min-height:100vh; min-width:100vw; padding:0; margin:0; display:flex; align-items:center; justify-content:center;">
+        <script type="text/javascript">
+            // Dynamically create AY ad unit div and display script based on adUnitId query param
+            function getQueryParam(name) {
+                const url = new URL(window.location.href);
+                return url.searchParams.get(name);
+            }
+            
+            var adUnitId = getQueryParam('adUnitId');
+            
+            if (debugMode) {
+                console.log('📺 Ad unit ID:', adUnitId);
+            }
+            
+            // Create the ad unit div
+            var adDiv = document.createElement('div');
+            adDiv.setAttribute('data-ay-manager-id', adUnitId);
+            adDiv.id = adUnitId;
+            
+            if (debugMode) {
+                console.log('🔧 Created ad div:', adDiv);
+            }
+            
+            // Append the dynamic ad unit directly to the ad-container
+            document.currentScript.parentNode.insertBefore(adDiv, document.currentScript);
+            
+            if (debugMode) {
+                console.log('✅ Ad div appended to container');
+            }
+            
+            // Display the ad unit using AY
+            window.ayManagerEnv = window.ayManagerEnv || { cmd: [] };
+            window.ayManagerEnv.cmd.push(function () {
+                if (debugMode) {
+                    console.log('📺 Displaying ad unit:', adUnitId);
+                }
+                ayManagerEnv.display(adUnitId);
+            });
+            
+            // Update debug info
+            function updateDebugInfo() {
+                if (!debugMode) return;
+                
+                const debugInfo = document.getElementById('debugInfo');
+                const debugStatus = document.getElementById('debugStatus');
+                const debugSize = document.getElementById('debugSize');
+                
+                if (debugInfo) {
+                    debugInfo.classList.add('visible');
+                    
+
+                    
+                    if (debugStatus) {
+                        debugStatus.textContent = 'Ad Unit: ' + adUnitId;
+                    }
+                    
+                    if (debugSize) {
+                        const container = document.getElementById('adContainer') || document.querySelector('.ad-container');
+                        if (container) {
+                            const rect = container.getBoundingClientRect();
+                            debugSize.textContent = 'Size: ' + Math.round(rect.width) + ' x ' + Math.round(rect.height);
+                        }
+                    }
+                
+                }
+            }
+            
+            // Initial debug update
+            updateDebugInfo();
+            
+            // Update debug info periodically
+            if (debugMode) {
+                setInterval(updateDebugInfo, 1000);
+            }
+        </script>
+    </div>
+    
+    <!-- Error Handling -->
+    <script type="text/javascript">
+        // Global error handler
+        window.addEventListener('error', function(e) {
+            console.error('🚨 JavaScript Error:', e.message, 'at', e.filename + ':' + e.lineno);
+            
+            if (debugMode) {
+                // Show error in debug panel
+                const debugStatus = document.getElementById('debugStatus');
+                if (debugStatus) {
+                    debugStatus.textContent = 'Error: ' + e.message;
+                    debugStatus.style.color = 'red';
+                }
+            }
+        });
+        
+        // Promise rejection handler
+        window.addEventListener('unhandledrejection', function(e) {
+            console.error('🚨 Unhandled Promise Rejection:', e.reason);
+        });
+    </script>
+</body>
+</html>

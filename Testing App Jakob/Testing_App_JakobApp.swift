@@ -6,15 +6,14 @@
 //
 
 import SwiftUI
-import GoogleMobileAds // Import the SDK
 
 @main
 struct AdTechTestbedApp: App {
-    @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate // You'll create this AppDelegate
+    @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            RefactoredContentView()
         }
     }
 }
