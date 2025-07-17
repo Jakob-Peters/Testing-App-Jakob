@@ -45,17 +45,6 @@
 			path = "Testing App Jakob";
 			sourceTree = "<group>";
 		};
-		864220922E210F7700AA0DAC /* Testing App JakobTests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = "Testing App JakobTests";
-			sourceTree = "<group>";
-		};
-		8642209C2E210F7700AA0DAC /* Testing App JakobUITests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = "Testing App JakobUITests";
-			sourceTree = "<group>";
-		};
-
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -90,8 +79,6 @@
 			children = (
 				86186C842E28E24900EC00C4 /* Sources */,
 				864220842E210F7600AA0DAC /* Testing App Jakob */,
-				864220922E210F7700AA0DAC /* Testing App JakobTests */,
-				8642209C2E210F7700AA0DAC /* Testing App JakobUITests */,
 				864220832E210F7600AA0DAC /* Products */,
 			);
 			sourceTree = "<group>";
@@ -147,9 +134,6 @@
 			dependencies = (
 				864220912E210F7700AA0DAC /* PBXTargetDependency */,
 			);
-			fileSystemSynchronizedGroups = (
-				864220922E210F7700AA0DAC /* Testing App JakobTests */,
-			);
 			name = "Testing App JakobTests";
 			packageProductDependencies = (
 			);
@@ -169,9 +153,6 @@
 			);
 			dependencies = (
 				8642209B2E210F7700AA0DAC /* PBXTargetDependency */,
-			);
-			fileSystemSynchronizedGroups = (
-				8642209C2E210F7700AA0DAC /* Testing App JakobUITests */,
 			);
 			name = "Testing App JakobUITests";
 			packageProductDependencies = (

@@ -47,6 +47,8 @@ struct RefactoredContentView: View {
     @State private var path: [Int] = [] // Navigation path (article IDs)
     @State private var adSizeFront = CGSize(width: 320, height: 250)
     @State private var frontPageAdKey = UUID() // Key to force webview recreation
+    @State private var showRestartAlert = false
+    @State private var currentDebugMode = UserDefaults.standard.object(forKey: "AdSDKDebugMode") as? Bool ?? true
     
     var body: some View {
         NavigationStack(path: $path) {
@@ -106,6 +108,16 @@ struct RefactoredContentView: View {
                 .padding(.horizontal)
             }
             .navigationTitle("Front Page")
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button(action: {
+                        toggleDebugMode()
+                    }) {
+                        Image(systemName: currentDebugMode ? "ladybug.fill" : "ladybug")
+                            .foregroundColor(currentDebugMode ? .orange : .gray)
+                    }
+                }
+            }
             .navigationDestination(for: Int.self) { articleId in
                 if let article = articles.first(where: { $0.id == articleId }) {
                     RefactoredArticleView(article: article)
@@ -117,7 +129,18 @@ struct RefactoredContentView: View {
                 // Regenerate key when returning to front page
                 frontPageAdKey = UUID()
             }
+            .alert("Debug Mode Changed", isPresented: $showRestartAlert) {
+                Button("OK") { }
+            } message: {
+                Text("Debug mode has been \(currentDebugMode ? "enabled" : "disabled"). Please completely close and reopen the app for changes to take effect.")
+            }
         }
+    }
+    
+    private func toggleDebugMode() {
+        currentDebugMode.toggle()
+        UserDefaults.standard.set(currentDebugMode, forKey: "AdSDKDebugMode")
+        showRestartAlert = true
     }
 }
 
@@ -325,6 +348,7 @@ struct DebugControlsExample: View {
     @State private var debugMode = true
     @State private var verboseLogging = false
     @State private var consoleLogging = true
+    @State private var showRestartAlert = false
     
     var body: some View {
         VStack(spacing: 16) {
@@ -364,6 +388,27 @@ struct DebugControlsExample: View {
             // Status display
             Text("SDK Status: \(AdSDK.shared.isSDKInitialized() ? "Initialized" : "Not Initialized")")
                 .foregroundColor(AdSDK.shared.isSDKInitialized() ? .green : .red)
+            
+            Spacer()
+            
+            // App-level debug toggle button
+            Button(action: {
+                showRestartAlert = true
+            }) {
+                HStack {
+                    Image(systemName: "ladybug.fill")
+                    Text("Toggle App Debug Mode")
+                }
+                .foregroundColor(.white)
+                .padding()
+                .background(Color.orange)
+                .cornerRadius(10)
+            }
+            .alert("Debug Mode Changed", isPresented: $showRestartAlert) {
+                Button("OK") { }
+            } message: {
+                Text("Debug mode has been toggled. Please completely close and reopen the app for changes to take effect.")
+            }
         }
         .padding()
     }
