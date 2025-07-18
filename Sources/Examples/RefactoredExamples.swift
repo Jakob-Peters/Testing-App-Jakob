@@ -11,9 +11,16 @@ struct Article: Identifiable {
 let articles: [Article] = [
     Article(
         id: 1,
-        title: "AdSDK Integration Guide",
-        preview: "Learn how to integrate the new modular AdSDK into your iOS project",
+        title: "Navigation example 1",
+        preview: "Navigation example 1 for reloading webviews",
         content: [
+            "The AdSDK provides a clean, modular approach to integrating web-based ads with consent management.",
+            "The AdSDK provides a clean, modular approach to integrating web-based ads with consent management.",
+            "The AdSDK provides a clean, modular approach to integrating web-based ads with consent management.",
+            "The AdSDK provides a clean, modular approach to integrating web-based ads with consent management.",
+            "The AdSDK provides a clean, modular approach to integrating web-based ads with consent management.",
+            "The AdSDK provides a clean, modular approach to integrating web-based ads with consent management.",
+            "The AdSDK provides a clean, modular approach to integrating web-based ads with consent management.",
             "The AdSDK provides a clean, modular approach to integrating web-based ads with consent management.",
             "With built-in Didomi integration, you can ensure GDPR compliance while maintaining optimal ad performance.",
             "The SDK includes automatic size detection, debug modes, and comprehensive logging capabilities."
@@ -21,8 +28,8 @@ let articles: [Article] = [
     ),
     Article(
         id: 2,
-        title: "Consent Management Best Practices",
-        preview: "Understanding GDPR compliance and user consent in mobile advertising",
+        title: "Navigation example 2",
+        preview: "Navigation example 2 for reloading webviews",
         content: [
             "User consent is crucial for modern advertising. The AdSDK integrates seamlessly with Didomi CMP.",
             "Proper consent management ensures legal compliance while maximizing ad revenue potential.",
@@ -31,8 +38,8 @@ let articles: [Article] = [
     ),
     Article(
         id: 3,
-        title: "Debug Mode and Development Tips",
-        preview: "Debugging tools and development workflow for the AdSDK",
+        title: "Navigation example 3",
+        preview: "Navigation example 3 for reloading webviews",
         content: [
             "The AdSDK includes comprehensive debugging tools for development and testing.",
             "Debug mode automatically adds the aym_debug=true parameter for enhanced logging.",
@@ -49,91 +56,102 @@ struct RefactoredContentView: View {
     @State private var frontPageAdKey = UUID() // Key to force webview recreation
     @State private var showRestartAlert = false
     @State private var currentDebugMode = UserDefaults.standard.object(forKey: "AdSDKDebugMode") as? Bool ?? true
-    
+    @State private var selectedTab = 0
+
     var body: some View {
-        NavigationStack(path: $path) {
-            ScrollView {
-                VStack(spacing: 24) {
-                    // Consent management - now much simpler
-                    ConsentBanner { status in
-                        print("Consent status changed: \(status)")
-                    }
-                    
-                    // Front page ad - simplified usage
-                    if path.isEmpty {
-                        AdWebView(
-                            adUnitId: "div-gpt-ad-mobile_1",
-                            adSize: $adSizeFront,
-                            debugMode: true, // This automatically adds aym_debug=true
-                            onSizeChanged: { size in
-                                print("Front page ad size: \(size)")
-                            }
-                        )
-                        .frame(width: adSizeFront.width, height: max(adSizeFront.height, 100))
-                        .border(Color.gray, width: 1)
-                        .padding(.top, 24)
-                        .id(frontPageAdKey)
-                    }
-                    
-                    Text("Welcome! Choose an article to read:")
-                        .font(.title2)
-                        .padding(.top, 8)
-                    
-                    // Article previews
-                    ForEach(articles) { article in
-                        NavigationLink(value: article.id) {
-                            VStack(alignment: .leading, spacing: 6) {
-                                Text(article.title)
-                                    .font(.headline)
-                                    .foregroundColor(.primary)
-                                Text(article.preview)
-                                    .font(.subheadline)
-                                    .foregroundColor(.secondary)
-                            }
-                            .padding()
-                            .background(Color(.systemGray6))
-                            .cornerRadius(10)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 10)
-                                    .stroke(Color.blue.opacity(0.2), lineWidth: 1)
-                            )
+        TabView(selection: $selectedTab) {
+            // Articles Tab
+            NavigationStack(path: $path) {
+                ScrollView {
+                    VStack(spacing: 24) {
+                        // Consent management - now much simpler
+                        ConsentBanner { status in
+                            print("Consent status changed: \(status)")
                         }
-                        .buttonStyle(PlainButtonStyle())
+                        
+                        // Front page ad - simplified usage
+                        if path.isEmpty {
+                            AdWebView(
+                                adUnitId: "div-gpt-ad-mobile_1",
+                                adSize: $adSizeFront,
+                            )
+                            .frame(width: adSizeFront.width, height: max(adSizeFront.height, 100))
+                            .border(Color.gray, width: 1)
+                            .padding(.top, 24)
+                            .id(frontPageAdKey)
+                        }
+                        
+                        Text("Welcome! Choose an article to read:")
+                            .font(.title2)
+                            .padding(.top, 8)
+                        
+                        // Article previews
+                        ForEach(articles) { article in
+                            NavigationLink(value: article.id) {
+                                VStack(alignment: .leading, spacing: 6) {
+                                    Text(article.title)
+                                        .font(.headline)
+                                        .foregroundColor(.primary)
+                                    Text(article.preview)
+                                        .font(.subheadline)
+                                        .foregroundColor(.secondary)
+                                }
+                                .padding()
+                                .background(Color(.systemGray6))
+                                .cornerRadius(10)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 10)
+                                        .stroke(Color.blue.opacity(0.2), lineWidth: 1)
+                                )
+                            }
+                            .buttonStyle(PlainButtonStyle())
+                        }
+                        
+                        .padding(.top, 16)
+                        
+                        Spacer(minLength: 32)
                     }
-                    
-                    .padding(.top, 16)
-                    
-                    Spacer(minLength: 32)
+                    .padding(.horizontal)
                 }
-                .padding(.horizontal)
-            }
-            .navigationTitle("Front Page")
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(action: {
-                        toggleDebugMode()
-                    }) {
-                        Image(systemName: currentDebugMode ? "ladybug.fill" : "ladybug")
-                            .foregroundColor(currentDebugMode ? .orange : .gray)
+                .navigationTitle("Front Page")
+                .toolbar {
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        Button(action: {
+                            toggleDebugMode()
+                        }) {
+                            Image(systemName: currentDebugMode ? "ladybug.fill" : "ladybug")
+                                .foregroundColor(currentDebugMode ? .orange : .gray)
+                        }
                     }
                 }
-            }
-            .navigationDestination(for: Int.self) { articleId in
-                if let article = articles.first(where: { $0.id == articleId }) {
-                    RefactoredArticleView(article: article)
-                } else {
-                    Text("Article not found.")
+                .navigationDestination(for: Int.self) { articleId in
+                    if let article = articles.first(where: { $0.id == articleId }) {
+                        RefactoredArticleView(article: article)
+                    } else {
+                        Text("Article not found.")
+                    }
+                }
+                .onAppear {
+                    // Regenerate key when returning to front page
+                    frontPageAdKey = UUID()
+                }
+                .alert("Debug Mode Changed", isPresented: $showRestartAlert) {
+                    Button("OK") { }
+                } message: {
+                    Text("Debug mode has been \(currentDebugMode ? "enabled" : "disabled"). Please completely close and reopen the app for changes to take effect.")
                 }
             }
-            .onAppear {
-                // Regenerate key when returning to front page
-                frontPageAdKey = UUID()
+            .tabItem {
+                Label("Articles", systemImage: "newspaper")
             }
-            .alert("Debug Mode Changed", isPresented: $showRestartAlert) {
-                Button("OK") { }
-            } message: {
-                Text("Debug mode has been \(currentDebugMode ? "enabled" : "disabled"). Please completely close and reopen the app for changes to take effect.")
-            }
+            .tag(0)
+
+            // Ad Types Tab
+            ConvenienceViewsExample()
+                .tabItem {
+                    Label("Article example", systemImage: "rectangle.grid.2x2")
+                }
+                .tag(1)
         }
     }
     
@@ -246,10 +264,6 @@ struct AdvancedAdExample: View {
             )
             .frame(width: adSize.width, height: adSize.height)
             .border(Color.gray)
-            .overlay(
-                loadingOverlay,
-                alignment: .center
-            )
             
             // State information
             Text("State: \(stateDescription)")
@@ -259,24 +273,6 @@ struct AdvancedAdExample: View {
         .padding()
     }
     
-    @ViewBuilder
-    private var loadingOverlay: some View {
-        switch loadingState {
-        case .loading:
-            ProgressView("Loading ad...")
-                .padding()
-                .background(Color.white.opacity(0.9))
-                .cornerRadius(8)
-        case .failed(let error):
-            Text("Error: \(error.localizedDescription)")
-                .foregroundColor(.red)
-                .padding()
-                .background(Color.white.opacity(0.9))
-                .cornerRadius(8)
-        default:
-            EmptyView()
-        }
-    }
     
     private var stateDescription: String {
         switch loadingState {
@@ -307,35 +303,32 @@ struct AdvancedAdExample: View {
 struct ConvenienceViewsExample: View {
     var body: some View {
         ScrollView {
-            VStack(spacing: 20) {
-                Text("Convenience Ad Views")
+            VStack(spacing: 30) {
+                Text("In-line article Ad Views")
                     .font(.title)
                 
-                // Banner ad
                 AdBannerView(
                     adUnitId: "div-gpt-ad-mobile_1",
-                    debugMode: true
+                    //debugMode: true
                 )
                 
-                Text("Article content here...")
+                Text("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed vitae porttitor dolor. Vestibulum suscipit pretium facilisis. Fusce quis tincidunt quam. Aenean non leo nunc. Duis hendrerit consequat lobortis.")
                     .font(.body)
                     .padding()
                 
-                // Medium rectangle ad
                 AdMediumRectangleView(
-                    adUnitId: "div-gpt-ad-mobile_1",
-                    debugMode: true
+                    adUnitId: "div-gpt-ad-mobile_2",
+                    //debugMode: true
                 )
                 
-                Text("More article content...")
+                Text("Suspendisse id auctor metus, vel egestas mi. Aenean tortor erat, blandit ut arcu in, fermentum placerat tellus. Nam at orci posuere, gravida est in, consectetur augue.")
                     .font(.body)
                     .padding()
                 
-                // Responsive ad
+
                 AdResponsiveView(
-                    adUnitId: "div-gpt-ad-mobile_1",
-                    maxWidth: 350,
-                    debugMode: true
+                    adUnitId: "div-gpt-ad-mobile_3",
+                    //debugMode: true
                 )
             }
         }
@@ -424,7 +417,7 @@ struct RefactoredApp: App {
             baseURL: "https://adops.stepdev.dk/wp-content/ad-template.html",
             didomiApiKey: "d0661bea-d696-4069-b308-11057215c4c4",
             yieldManagerId: "AFtbN2xnQGXShTYuo",
-            debugMode: true // Easy toggle for debug mode
+            debugMode: false // Easy toggle for debug mode
         )
         
         // Optional: Set up custom logging

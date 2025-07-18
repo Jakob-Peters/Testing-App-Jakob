@@ -2,6 +2,26 @@
 
 A modular Swift framework for integrating web-based ads with Didomi consent management and dynamic ad sizing.
 
+## Bugs and Current Known Issues
+
+### Viewability Issues with WebView JS Logic and Native Scrolling
+
+- **Issue**: Currently, the WebView isn't aware whether it's off-screen or on-screen with respect to the native view of the device versus the WebView itself. This fundamentally makes all WebView loads "viewable," resulting in viewability always being 100%.
+- **Possible Solution**: 
+    1. Create an observer within the native view that sends an event to the WebView (using a JS-based event listener in the HTML code) when it is off-screen or on-screen.
+    2. The event listener adds a class to the parent ad unit element (or a new high z-index element) with `display: hidden`, toggling the class on or off based on the WebView's position within the native view.
+    3. This should provide a more accurate solution for determining when the ad unit (WebView) is visible or not within the WebView.
+- **Problems That Cannot Be Resolved**: The "50% viewport for 1s" requirement cannot be reliably handled, since (to my knowledge) proper MutationObservers cannot track real-time visibility relative to the native view.
+
+### Lazy Loading of WebView Frames (AdWebView)
+
+- **Issue**: All WebViews load when the native view loads, sending auctions and creating impressions even if the user may never see the ad.
+- **Possible Solution**:
+    1. Create an observer for the native view with a configurable value that can initialize the WebView based on pixel distance (or screen height).
+    2. This will allow WebViews to load (and create impressions) only when the user is close to the WebView.
+    3. Combined with the viewability observer, this should address most edge cases and performance-related tracking, resulting in behavior closer to normal web-based ad units.
+
+
 ## Overview
 
 This framework provides a complete solution for displaying web-based ads in iOS applications with:
